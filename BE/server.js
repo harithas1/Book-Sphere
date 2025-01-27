@@ -9,6 +9,7 @@ const Joi = require("joi");
 
 app.use(cors());
 
+require("dotenv").config();
 app.use(express.json());
 
 // JWT_SECRET = 120kjnjhu748932983y27h
@@ -57,14 +58,14 @@ const pool = new Pool({
   `;
     const createBooksTable = `
       CREATE TABLE IF NOT EXISTS books (
-        id SERIAL PRIMARY KEY,
-        title VARCHAR(255) UNIQUE NOT NULL,
-        author VARCHAR(255) NOT NULL,
-        genre VARCHAR(255) NOT NULL,
-        price DECIMAL(10, 2) NOT NULL,
-        copies INTEGER NOT NULL,
-        available_copies INTEGER DEFAULT 0,
-        rented_copies INTEGER DEFAULT 0
+          id SERIAL PRIMARY KEY,
+          title VARCHAR(255) UNIQUE NOT NULL,
+          author VARCHAR(255) NOT NULL,
+          genre VARCHAR(255) NOT NULL,
+          price DECIMAL(10, 2) NOT NULL,
+          copies INTEGER NOT NULL,
+          rented_copies INTEGER DEFAULT 0 NOT NULL,
+          available_copies INTEGER GENERATED ALWAYS AS (copies - rented_copies) STORED
       );
     `;
     const createRentalTable = `
@@ -217,7 +218,7 @@ app.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
-      expiresIn: "10h",
+      expiresIn: "1h",
     });
     console.log({
       token,
@@ -794,7 +795,7 @@ app.put(
 
     try {
       const result = await pool.query(
-        `UPDATE books SET title = $1, author = $2, genre = $3, price = $4, copies = $5, available_copies = $5 - rented_copies WHERE id = $6`,
+        `UPDATE books SET title = $1, author = $2, genre = $3, price = $4, copies = $5 WHERE id = $6`,
         [title, author, genre, price, copies, bookId]
       );
       
