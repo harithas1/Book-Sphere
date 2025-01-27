@@ -9,7 +9,6 @@ const Joi = require("joi");
 
 app.use(cors());
 
-require("dotenv").config();
 app.use(express.json());
 
 // JWT_SECRET = 120kjnjhu748932983y27h
