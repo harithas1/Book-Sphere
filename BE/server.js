@@ -712,32 +712,32 @@ app.put(
 );
 
 // Update Book Copies (Admin)
-app.put(
-  "/admin/:id/book/:bookId/copies",
-  authenticateToken,
-  authorizeAdmin,
-  async (req, res) => {
-    const { bookId } = req.params;
-    const { copies } = req.body; // New copy count
-    try {
-      const result = await pool.query(
-        `
-      UPDATE books 
-      SET copies = $1, available_copies = GREATEST($1 - rented_copies, 0)
-      WHERE id = $2
-    `,
-        [copies, bookId]
-      );
-      if (result.rowCount === 0) {
-        return res.status(404).json({ error: "Book not found" });
-      }
-      res.status(200).json({ message: "Book copies updated successfully" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  }
-);
+// app.put(
+//   "/admin/:id/book/:bookId/copies",
+//   authenticateToken,
+//   authorizeAdmin,
+//   async (req, res) => {
+//     const { bookId } = req.params;
+//     const { copies } = req.body; // New copy count
+//     try {
+//       const result = await pool.query(
+//         `
+//       UPDATE books 
+//       SET copies = $1, available_copies = GREATEST($1 - rented_copies, 0)
+//       WHERE id = $2
+//     `,
+//         [copies, bookId]
+//       );
+//       if (result.rowCount === 0) {
+//         return res.status(404).json({ error: "Book not found" });
+//       }
+//       res.status(200).json({ message: "Book copies updated successfully" });
+//     } catch (err) {
+//       console.error(err);
+//       res.status(500).json({ error: "Internal server error" });
+//     }
+//   }
+// );
 
 // Endpoint to get all users
 app.get(
