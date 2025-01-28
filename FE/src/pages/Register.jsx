@@ -14,7 +14,10 @@ export default function Register() {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:5001/register", form);
+      const response = await axios.post(
+        "https://hari-book-sphere.netlify.app/register",
+        form
+      );
       console.log("Registration successful:", response.data);
       setError("");
     } catch (error) {
