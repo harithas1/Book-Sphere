@@ -10,18 +10,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { CirclePlus } from "lucide-react";
 
 export default function AdminPanel({ token, role, id }) {
   const [admin, setAdmin] = useState([]);
   const [users, setUsers] = useState([]);
   const [books, setBooks] = useState([]);
   const [rentals, setRentals] = useState([]);
-  const [reports, setReports] = useState({});
   const [activeTab, setActiveTab] = useState("adminDetails");
 
   // State for modal/dialog
   const [editBook, setEditBook] = useState(null);
   const [editUser, setEditUser] = useState(null);
+
+  const [addBook, setAddBook] = useState({
+    title: "",
+    author: "",
+    genre: "",
+    copies: "",
+    price: "",
+  })
+  const [isadding, setIsAdding]= useState(false)
 
   // Fetch admin data
   const fetchAdmin = async () => {
@@ -35,7 +44,7 @@ export default function AdminPanel({ token, role, id }) {
     }
   };
 
-  // Fetch users, books, rentals, and reports data
+  // Fetch users, books, rentals data
   const fetchUsersData = async () => {
     try {
       const response = await axios.get(
@@ -48,60 +57,82 @@ export default function AdminPanel({ token, role, id }) {
     }
   };
 
+  const handleUserDetails = async () => {
+    try {
+      await axios.put(
+        `http://localhost:5000/${role}/${id}/user/edit/${editUser.id}`,
+        editUser,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("User details updated successfully!");
+      setEditUser(null);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to reset user details.");
+    }
+  };
+
   const fetchBooks = async () => {
     try {
       const response = await axios.get(
         `http://localhost:5000/${role}/${id}/books`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      console.log(response.data);
       setBooks(response.data);
     } catch (err) {
       console.error(err);
     }
   };
 
-  const fetchRentals = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:5000/${role}/${id}/rentals/details`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setRentals(response.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // app.put(
+  //   "/admin/:id/book/:bookId",
+  //   authenticateToken,
+  //   authorizeAdmin,
+  //   bookValidate,
+  //   async (req, res) => {
+  //     const { bookId } = req.params;
+  //     const { title, author, genre, price, copies } = req.body;
+  //     console.log(bookId, title, author, genre, price, copies);
 
-  const fetchReports = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:5000/${role}/${id}/reports`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setReports(response.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  //     try {
+  //       const result = await pool.query(
+  //         `UPDATE books SET title = $1, author = $2, genre = $3, price = $4, copies = $5 WHERE id = $6`,
+  //         [title, author, genre, price, copies, bookId]
+  //       );
+
+  //       if (result.rowCount === 0) {
+  //         return res.status(404).json({ error: "Book not found" });
+  //       }
+  //       res.status(200).json({ message: "Book updated successfully" });
+  //     } catch (err) {
+  //       console.error(err);
+  //       res.status(500).json({ error: "Internal server error" });
+  //     }
+  //   }
+  // );
 
   // Update book details
   const handleUpdateBook = async () => {
-  
     console.log(editBook);
-    
 
     try {
       await axios.put(
-        `http://localhost:5000/${role}/${id}/book/${editBook.id}`,
-        editBook,
+        `http://localhost:5000/${role}/${id}/book/edit/${editBook.id}`,
+        {
+          title: editBook.title,
+          author: editBook.author,
+          genre: editBook.genre,
+          price: editBook.price,
+          copies: editBook.copies,
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // alert("Book updated successfully!");
+      alert("Book details updated successfully!");
       setEditBook(null);
-      fetchBooks();
     } catch (err) {
       console.error(err);
-      alert("Failed to update book.");
+      alert("Failed to update book details.");
     }
   };
 
@@ -119,37 +150,46 @@ export default function AdminPanel({ token, role, id }) {
     }
   };
 
-  // Reset user password
-  // /admin/:id/user/:userId/edit
-  const handleUserDetails = async () => {
+  const fetchRentals = async () => {
     try {
-      await axios.put(
-        `http://localhost:5000/${role}/${id}/user/edit/${editUser.id}`,
-        editUser,
+      const response = await axios.get(
+        `http://localhost:5000/${role}/${id}/rentals/details`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert("User details updated successfully!");
-      setEditUser(null);
+      setRentals(response.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to reset user details.");
     }
   };
 
-  // Update user role
-  const handleUpdateRole = async () => {
+  const handleAddBook = async () => {
+    console.log(addBook);
+    
     try {
-      await axios.put(
-        `http://localhost:5000/${role}/${id}/user/${editUser.id}/role`,
-        { role: editUser.role },
+      await axios.post(
+        `http://localhost:5000/${role}/${id}/book/add`,
+        {
+          title:addBook.title,
+          author:addBook.author,
+          genre:addBook.genre,
+          copies:addBook.copies,
+          price:addBook.price
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert("User role updated successfully!");
-      setEditUser(null);
-      fetchUsersData();
+      alert("Book added successfully!");
+      setAddBook({
+        title: "",
+        author: "",
+        genre: "",
+        copies: "",
+        price: "",
+      })
+      setIsAdding(false)
+      fetchBooks();
     } catch (err) {
       console.error(err);
-      alert("Failed to update role.");
+      alert("Failed to add book.");
     }
   };
 
@@ -158,7 +198,6 @@ export default function AdminPanel({ token, role, id }) {
     fetchUsersData();
     fetchBooks();
     fetchRentals();
-    fetchReports();
   }, []);
 
   return (
@@ -169,15 +208,19 @@ export default function AdminPanel({ token, role, id }) {
           <TabsTrigger value="usersDetails">Customers Details</TabsTrigger>
           <TabsTrigger value="books">All Books</TabsTrigger>
           <TabsTrigger value="rent">Rented Books Details</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
         {/* Responsive tabs */}
-        <select className="lg:hidden sm:hidden md:hidden max-sm: block px-4 py-2 w-full" name="tabs" id="tabs" value={activeTab} onChange={(e) => setActiveTab(e.target.value)}>
+        <select
+          className="lg:hidden sm:hidden md:hidden max-sm: block px-4 py-2 w-full"
+          name="tabs"
+          id="tabs"
+          value={activeTab}
+          onChange={(e) => setActiveTab(e.target.value)}
+        >
           <option value="adminDetails">Admin Details</option>
           <option value="usersDetails">Customers Details</option>
           <option value="books">All Books</option>
           <option value="rent">Rented Books Details</option>
-          <option value="reports">Reports</option>
         </select>
 
         <TabsContent value="adminDetails">
@@ -246,7 +289,14 @@ export default function AdminPanel({ token, role, id }) {
         </TabsContent>
 
         <TabsContent value="books">
-          <h2 className="text-2xl font-semibold mb-4">All Books</h2>
+          <section className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold mb-4">All Books</h2>
+            <CirclePlus
+              onClick={()=>(handleAddBook,setIsAdding(!isadding))}
+              className="cursor-pointer text-teal-600 hover:text-teal-800 transition-all size-12"
+            />
+          </section>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {books.map((book) => (
               <Card key={book.id} className="p-4">
@@ -335,24 +385,6 @@ export default function AdminPanel({ token, role, id }) {
             ))}
           </div>
         </TabsContent>
-
-        <TabsContent value="reports">
-          <h2 className="text-2xl font-semibold mb-4">Reports</h2>
-          <Card className="p-4">
-            <p>
-              <strong>Total Users:</strong> {reports.totalUsers}
-            </p>
-            <p>
-              <strong>Total Books:</strong> {reports.totalBooks}
-            </p>
-            <p>
-              <strong>Total Rentals:</strong> {reports.totalRentals}
-            </p>
-            <p>
-              <strong>Overdue Rentals:</strong> {reports.overdueRentals}
-            </p>
-          </Card>
-        </TabsContent>
       </Tabs>
 
       {/* Edit Book Dialog */}
@@ -393,7 +425,7 @@ export default function AdminPanel({ token, role, id }) {
               type="number"
               value={editBook.price}
               onChange={(e) =>
-                setEditBook({ ...editBook, price: e.target.value })
+                setEditBook({ ...editBook, price: parseInt(e.target.value) })
               }
               placeholder="Price"
             />
@@ -401,10 +433,11 @@ export default function AdminPanel({ token, role, id }) {
               type="number"
               value={editBook.copies}
               onChange={(e) =>
-                setEditBook({ ...editBook, copies: e.target.value,
-                                    id: editBook.id
-
-                 })
+                setEditBook({
+                  ...editBook,
+                  copies: parseInt(e.target.value),
+                  id: editBook.id,
+                })
               }
               placeholder="Total Copies"
             />
@@ -455,6 +488,55 @@ export default function AdminPanel({ token, role, id }) {
               type="password"
             />
             <Button onClick={handleUserDetails}>Reset</Button>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {isadding && (
+        <Dialog open={Boolean(isadding)} onOpenChange={() => setIsAdding(false)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Book</DialogTitle>
+            </DialogHeader>
+            <Input
+              value={addBook.title}
+              onChange={(e) =>
+                setAddBook({ ...addBook, title: e.target.value })
+              }
+              placeholder="Title"
+            />
+            <Input
+              value={addBook.author}
+              onChange={(e) =>
+                setAddBook({ ...addBook, author: e.target.value })
+              }
+              placeholder="Author"
+            />
+            <Input
+              value={addBook.genre}
+              onChange={(e) =>
+                setAddBook({ ...addBook, genre: e.target.value })
+              }
+              placeholder="Genre"
+            />
+            <Input
+              value={addBook.price}
+              onChange={(e) =>
+                setAddBook({ ...addBook, price: parseInt(e.target.value) })
+              }
+              placeholder="Price"
+            />
+            <Input
+              value={addBook.copies}
+              onChange={(e) =>
+                setAddBook({
+                  ...addBook,
+                  copies: parseInt(e.target.value),
+                })
+              }
+              placeholder="Total Copies"
+            />
+            <Button onClick={handleAddBook}>Add</Button>
           </DialogContent>
         </Dialog>
       )}

@@ -27,6 +27,8 @@ const User = ({ token, role, id }) => {
     }
   };
 
+ 
+
   // Fetch user's rental history
   const fetchUserHistory = async () => {
     try {
@@ -39,20 +41,24 @@ const User = ({ token, role, id }) => {
         }
       );
       setHistory(response.data);
-      setLoading(false);
+      console.log(response.data);
+      
     } catch (err) {
       setError(err.message);
     }
+    
   };
 
   // Fetch available books for rent
   const fetchAvailableBooks = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/books", {
+      const response = await axios.get(`http://localhost:5000/user/${id}/books`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+      console.log(response.data);
+      
       setAvailableBooks(response.data);
     } catch (err) {
       setError(err.message);
@@ -63,7 +69,7 @@ const User = ({ token, role, id }) => {
     setIsRenting(true);
     try {
       await axios.post(
-        `http://localhost:5000/user/rentbook`,
+        `http://localhost:5000/user/${id}/rentbook`,
         { bookId },
         {
           headers: {
@@ -179,7 +185,7 @@ const User = ({ token, role, id }) => {
                   <p className="font-semibold text-gray-700">
                     Book Title: {rental.book_title}
                   </p>
-                  <p>Rent Date: {rental.rent_date}</p>
+                  <p>Rent Date: {new Date(rental.rent_date).toLocaleDateString()}</p>
                   <p>
                     Return Date:{" "}
                     {rental.return_date
