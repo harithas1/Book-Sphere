@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import Login from "./Login";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -8,7 +10,8 @@ export default function Register() {
     password: "",
     role: "user",
   });
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,9 +22,9 @@ export default function Register() {
         form
       );
       console.log("Registration successful:", response.data);
-      setError("");
+      setMessage("Registration successful!");
     } catch (error) {
-      setError(error.response?.data?.error || "Something went wrong!");
+      setMessage(error.response?.data?.error || "Something went wrong!");
     }
   };
 
@@ -82,11 +85,9 @@ export default function Register() {
           >
             Register
           </button>
-          <a className="text-white" href="/login">
-            Login
-          </a>
+          <button className="text-white hover:text-blue-700" onClick={() => navigate("/login")}>Login</button>
         </form>
-        <div>{error && <p className="text-red-500">{error}</p>}</div>
+        <div>{message && <p className="text-red-500">{message}</p>}</div>
       </section>
     </div>
   );

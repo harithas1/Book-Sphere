@@ -69,6 +69,7 @@ const User = ({ token, role, id }) => {
 
   const handleRentBook = async (bookId) => {
     setIsRenting(true);
+    
     try {
       await axios.post(
         `https://book-sphere-1.onrender.com/user/${id}/rentbook`,

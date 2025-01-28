@@ -42,29 +42,29 @@ const pool = new Pool({
     );
   `;
     const createBooksTable = `
-      CREATE TABLE IF NOT EXISTS books (
-          id SERIAL PRIMARY KEY,
-          title VARCHAR(255) UNIQUE NOT NULL,
-          author VARCHAR(255) NOT NULL,
-          genre VARCHAR(255) NOT NULL,
-          price DECIMAL(10, 2) NOT NULL,
-          copies INTEGER NOT NULL,
-          rented_copies INTEGER DEFAULT 0 NOT NULL,
-          available_copies INTEGER GENERATED ALWAYS AS (copies - rented_copies) STORED
+     CREATE TABLE IF NOT EXISTS books (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) UNIQUE NOT NULL,
+        author VARCHAR(255) NOT NULL,
+        genre VARCHAR(255) NOT NULL,
+        price DECIMAL(10, 2) NOT NULL,
+        copies INTEGER NOT NULL,
+        rented_copies INTEGER DEFAULT 0 NOT NULL,
+        available_copies INTEGER GENERATED ALWAYS AS (copies - rented_copies) STORED
       );
+
     `;
     const createRentalTable = `
     CREATE TABLE IF NOT EXISTS rentals (
-    id SERIAL PRIMARY KEY,
-    customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE,
-    book_id INTEGER REFERENCES books(id) ON DELETE CASCADE,
-    rent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    return_date TIMESTAMP,
-    returned BOOLEAN DEFAULT FALSE
-      );
+      id SERIAL PRIMARY KEY,
+      customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE,
+      book_id INTEGER REFERENCES books(id) ON DELETE CASCADE,
+      rent_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      return_date TIMESTAMP,
+      returned BOOLEAN DEFAULT FALSE,
+      CONSTRAINT unique_rental UNIQUE (customer_id, book_id, returned)
+    );
     `;
-
-
 
     await pool.query(createCustomersTable);
     await pool.query(createBooksTable);
@@ -199,10 +199,13 @@ app.post("/login", async (req, res) => {
   }
 
   const { name, password, role } = req.body;
+  console.log(name, password, role);
+
   try {
     const result = await pool.query("SELECT * FROM customers WHERE name = $1", [
       name,
     ]);
+
     if (result.rows.length === 0) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
@@ -377,7 +380,7 @@ app.post("/user/:id/rentbook", authenticateToken, async (req, res) => {
 
     // Update book record (decrease available copies, increase rented copies)
     await pool.query(
-      "UPDATE books SET rented_copies = rented_copies + 1, available_copies = available_copies - 1 WHERE id = $1",
+      "UPDATE books SET rented_copies = rented_copies + 1 WHERE id = $1",
       [bookId]
     );
 
