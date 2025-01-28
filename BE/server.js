@@ -13,13 +13,18 @@ app.use(express.json());
 const JWT_SECRET = "120kjnjhu748932983y27h";
 const JWT_EXPIRES = "10h";
 
+// Database connection to Render PostgreSQL
 const pool = new Pool({
-  user: "jtd",
-  host: "localhost",
-  database: "postgres",
-  password: "jtd@123",
-  port: 5432,
+  user: "booksphere_user", // Use the correct username for your Render database
+  host: "dpg-cucbcq2j1k6c73b83b00-a.oregon-postgres.render.com", // Use the Render host URL
+  database: "booksphere", // Use the correct database name
+  password: "KbbRc3O5SJnMcvwrZFBJp5UAfkjKfsEn", // Use the correct password
+  port: 5432, // Default PostgreSQL port
+  ssl: {
+    rejectUnauthorized: false, // Allows connections even if the SSL certificate is not authorized
+  },
 });
+
 
 // Connect to the database and create necessary tables
 (async () => {
@@ -147,12 +152,16 @@ const authorizeAdmin = (req, res, next) => {
 
 // Register User
 app.post("/register", async (req, res) => {
+  console.log(req.body);
+  
   const { error } = regSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
-
+  console.log("hello")
   const { name, phone, password, role } = req.body;
+  console.log(name, phone, password, role);
+  
   try {
     const existingUser = await pool.query(
       "SELECT * FROM customers WHERE phone = $1",

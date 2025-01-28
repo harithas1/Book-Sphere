@@ -15,7 +15,7 @@ export default function Register() {
 
     try {
       const response = await axios.post(
-        "https://hari-book-sphere.netlify.app/register",
+        "https://book-sphere-1.onrender.com/api/books/register",
         form
       );
       console.log("Registration successful:", response.data);
