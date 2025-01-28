@@ -25,7 +25,6 @@ const pool = new Pool({
   },
 });
 
-
 // Connect to the database and create necessary tables
 (async () => {
   try {
@@ -153,15 +152,15 @@ const authorizeAdmin = (req, res, next) => {
 // Register User
 app.post("/register", async (req, res) => {
   console.log(req.body);
-  
+
   const { error } = regSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
-  console.log("hello")
+  console.log("hello");
   const { name, phone, password, role } = req.body;
   console.log(name, phone, password, role);
-  
+
   try {
     const existingUser = await pool.query(
       "SELECT * FROM customers WHERE phone = $1",
@@ -604,9 +603,22 @@ app.post(
         [title, author, genre, price, copies]
       );
       res.status(201).json({ message: "Book added successfully" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
+    } catch (error) {
+      if (error.code === "23505") {
+        // Handle duplicate key error for unique constraint
+        res.status(400).json({
+          success: false,
+          message: `The book title ${title} already exists. Please choose a different title.`,
+          error: error.message,
+        });
+      } else {
+        // Generic error handler
+        res.status(500).json({
+          success: false,
+          message: "An error occurred while adding the book.",
+          error: error.message,
+        });
+      }
     }
   }
 );

@@ -15,7 +15,7 @@ export default function Register() {
 
     try {
       const response = await axios.post(
-        "https://book-sphere-1.onrender.com/api/books/register",
+        "https://book-sphere-1.onrender.com/register",
         form
       );
       console.log("Registration successful:", response.data);

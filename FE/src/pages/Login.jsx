@@ -11,8 +11,60 @@ export default function Login({ setRole, setToken, setId }) {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Login User
+  // app.post("/login", async (req, res) => {
+  //   const loginSchema = Joi.object({
+  //     name: Joi.string().required(),
+  //     password: Joi.string().required(),
+  //     role: Joi.string().valid("user", "admin").required(),
+  //   });
+
+  //   const { error } = loginSchema.validate(req.body);
+  //   if (error) {
+  //     return res.status(400).json({ error: error.details[0].message });
+  //   }
+
+  //   const { name, password, role } = req.body;
+  //   try {
+  //     const result = await pool.query(
+  //       "SELECT * FROM customers WHERE name = $1",
+  //       [name]
+  //     );
+  //     if (result.rows.length === 0) {
+  //       return res.status(401).json({ error: "Invalid credentials" });
+  //     }
+
+  //     const user = result.rows[0];
+  //     const passwordMatch = await bcrypt.compare(password, user.password);
+  //     if (!passwordMatch) {
+  //       return res.status(401).json({ error: "Invalid credentials" });
+  //     }
+
+  //     if (user.role !== role) {
+  //       return res.status(403).json({ error: "Access denied for this role" });
+  //     }
+
+  //     const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
+  //       expiresIn: JWT_EXPIRES,
+  //     });
+
+  //     res.json({
+  //       token,
+  //       user: {
+  //         id: user.id,
+  //         name: user.name,
+  //         phone: user.phone,
+  //         role: user.role,
+  //       },
+  //     });
+  //   } catch (err) {
+  //     console.error("Error during login:", err.message);
+  //     res.status(500).json({ error: "Internal server error" });
+  //   }
+  // });
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(form);
 
     if (!form.name || !form.password) {
       setError("All fields are required!");
@@ -20,10 +72,19 @@ export default function Login({ setRole, setToken, setId }) {
     }
 
     try {
+      console.log("trying..");
+
       const response = await axios.post(
-        "https://book-sphere-1.onrender.com/api/books/login",
-        form
+        "https://book-sphere-1.onrender.com/login",
+        // upload data in json format
+        {
+          name: form.name,
+          password: form.password,
+          role: form.role,
+        }
       );
+
+      console.log("Login successful:", response.data);
       setError("");
       setToken(response.data.token);
       setRole(response.data.user.role);

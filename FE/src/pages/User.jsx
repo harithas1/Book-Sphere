@@ -14,7 +14,7 @@ const User = ({ token, role, id }) => {
   const fetchUserData = async () => {
     try {
       const response = await axios.get(
-        `https://book-sphere-1.onrender.com/api/books/user/${id}`,
+        `https://book-sphere-1.onrender.com/user/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -34,7 +34,7 @@ const User = ({ token, role, id }) => {
   const fetchUserHistory = async () => {
     try {
       const response = await axios.get(
-        `https://book-sphere-1.onrender.com/api/books/user/${id}/rentals`,
+        `https://book-sphere-1.onrender.com/user/${id}/rentals`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -52,7 +52,7 @@ const User = ({ token, role, id }) => {
   const fetchAvailableBooks = async () => {
     try {
       const response = await axios.get(
-        `https://book-sphere-1.onrender.com/api/books/user/${id}/books`,
+        `https://book-sphere-1.onrender.com/user/${id}/books`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -71,7 +71,7 @@ const User = ({ token, role, id }) => {
     setIsRenting(true);
     try {
       await axios.post(
-        `https://book-sphere-1.onrender.com/api/books/user/${id}/rentbook`,
+        `https://book-sphere-1.onrender.com/user/${id}/rentbook`,
         { bookId },
         {
           headers: {

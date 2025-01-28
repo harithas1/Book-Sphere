@@ -36,7 +36,7 @@ export default function AdminPanel({ token, role, id }) {
   const fetchAdmin = async () => {
     try {
       const response = await axios.get(
-        `https://book-sphere-1.onrender.com/api/books/${role}/${id}`,
+        `https://book-sphere-1.onrender.com/${role}/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -51,7 +51,7 @@ export default function AdminPanel({ token, role, id }) {
   const fetchUsersData = async () => {
     try {
       const response = await axios.get(
-        `https://book-sphere-1.onrender.com/api/books/${role}/${id}/users`,
+        `https://book-sphere-1.onrender.com/${role}/${id}/users`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setUsers(response.data);
@@ -63,7 +63,7 @@ export default function AdminPanel({ token, role, id }) {
   const handleUserDetails = async () => {
     try {
       await axios.put(
-        `https://book-sphere-1.onrender.com/api/books/${role}/${id}/user/edit/${editUser.id}`,
+        `https://book-sphere-1.onrender.com/${role}/${id}/user/edit/${editUser.id}`,
         editUser,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -78,7 +78,7 @@ export default function AdminPanel({ token, role, id }) {
   const fetchBooks = async () => {
     try {
       const response = await axios.get(
-        `https://book-sphere-1.onrender.com/api/books/${role}/${id}/books`,
+        `https://book-sphere-1.onrender.com/${role}/${id}/books`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log(response.data);
@@ -121,7 +121,7 @@ export default function AdminPanel({ token, role, id }) {
 
     try {
       await axios.put(
-        `https://book-sphere-1.onrender.com/api/books/${role}/${id}/book/edit/${editBook.id}`,
+        `https://book-sphere-1.onrender.com/${role}/${id}/book/edit/${editBook.id}`,
         {
           title: editBook.title,
           author: editBook.author,
@@ -143,7 +143,7 @@ export default function AdminPanel({ token, role, id }) {
   const handleDeleteBook = async (bookId) => {
     try {
       await axios.delete(
-        `https://book-sphere-1.onrender.com/api/books/${role}/${id}/book/${bookId}`,
+        `https://book-sphere-1.onrender.com/${role}/${id}/book/${bookId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -159,7 +159,7 @@ export default function AdminPanel({ token, role, id }) {
   const fetchRentals = async () => {
     try {
       const response = await axios.get(
-        `https://book-sphere-1.onrender.com/api/books/${role}/${id}/rentals/details`,
+        `https://book-sphere-1.onrender.com/${role}/${id}/rentals/details`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setRentals(response.data);
@@ -173,7 +173,7 @@ export default function AdminPanel({ token, role, id }) {
 
     try {
       await axios.post(
-        `https://book-sphere-1.onrender.com/api/books/${role}/${id}/book/add`,
+        `https://book-sphere-1.onrender.com/${role}/${id}/book/add`,
         {
           title: addBook.title,
           author: addBook.author,

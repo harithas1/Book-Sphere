@@ -14793,10 +14793,9 @@ const tx = ({ token: n, role: o, id: i }) => {
     [S, k] = v.useState(!1),
     P = async () => {
       try {
-        const V = await pe.get(
-          `https://book-sphere-1.onrender.com/api/books/user/${i}`,
-          { headers: { Authorization: `Bearer ${n}` } }
-        );
+        const V = await pe.get(`https://book-sphere-1.onrender.com/user/${i}`, {
+          headers: { Authorization: `Bearer ${n}` },
+        });
         u(V.data), console.log(V.data);
       } catch (V) {
         w(V.message);
@@ -14807,7 +14806,7 @@ const tx = ({ token: n, role: o, id: i }) => {
     L = async () => {
       try {
         const V = await pe.get(
-          `https://book-sphere-1.onrender.com/api/books/user/${i}/rentals`,
+          `https://book-sphere-1.onrender.com/user/${i}/rentals`,
           { headers: { Authorization: `Bearer ${n}` } }
         );
         f(V.data), console.log(V.data);
@@ -14818,7 +14817,7 @@ const tx = ({ token: n, role: o, id: i }) => {
     F = async () => {
       try {
         const V = await pe.get(
-          `https://book-sphere-1.onrender.com/api/books/user/${i}/books`,
+          `https://book-sphere-1.onrender.com/user/${i}/books`,
           { headers: { Authorization: `Bearer ${n}` } }
         );
         console.log(V.data), y(V.data);
@@ -14830,7 +14829,7 @@ const tx = ({ token: n, role: o, id: i }) => {
       k(!0);
       try {
         await pe.post(
-          `https://book-sphere-1.onrender.com/api/books/user/${i}/rentbook`,
+          `https://book-sphere-1.onrender.com/user/${i}/rentbook`,
           { bookId: V },
           { headers: { Authorization: `Bearer ${n}` } }
         ),
@@ -17479,10 +17478,9 @@ function nS({ token: n, role: o, id: i }) {
     [F, $] = v.useState(!1),
     H = async () => {
       try {
-        const I = await pe.get(
-          `https://book-sphere-1.onrender.com/api/books/${o}/${i}`,
-          { headers: { Authorization: `Bearer ${n}` } }
-        );
+        const I = await pe.get(`https://book-sphere-1.onrender.com/${o}/${i}`, {
+          headers: { Authorization: `Bearer ${n}` },
+        });
         u(I.data);
       } catch (I) {
         console.error(I);
@@ -17491,7 +17489,7 @@ function nS({ token: n, role: o, id: i }) {
     V = async () => {
       try {
         const I = await pe.get(
-          `https://book-sphere-1.onrender.com/api/books/${o}/${i}/users`,
+          `https://book-sphere-1.onrender.com/${o}/${i}/users`,
           { headers: { Authorization: `Bearer ${n}` } }
         );
         f(I.data);
@@ -17502,7 +17500,7 @@ function nS({ token: n, role: o, id: i }) {
     Q = async () => {
       try {
         await pe.put(
-          `https://book-sphere-1.onrender.com/api/books/${o}/${i}/user/edit/${S.id}`,
+          `https://book-sphere-1.onrender.com/${o}/${i}/user/edit/${S.id}`,
           S,
           { headers: { Authorization: `Bearer ${n}` } }
         ),
@@ -17515,7 +17513,7 @@ function nS({ token: n, role: o, id: i }) {
     ee = async () => {
       try {
         const I = await pe.get(
-          `https://book-sphere-1.onrender.com/api/books/${o}/${i}/books`,
+          `https://book-sphere-1.onrender.com/${o}/${i}/books`,
           { headers: { Authorization: `Bearer ${n}` } }
         );
         console.log(I.data), y(I.data);
@@ -17527,7 +17525,7 @@ function nS({ token: n, role: o, id: i }) {
       console.log(T);
       try {
         await pe.put(
-          `https://book-sphere-1.onrender.com/api/books/${o}/${i}/book/edit/${T.id}`,
+          `https://book-sphere-1.onrender.com/${o}/${i}/book/edit/${T.id}`,
           {
             title: T.title,
             author: T.author,
@@ -17546,7 +17544,7 @@ function nS({ token: n, role: o, id: i }) {
     ve = async (I) => {
       try {
         await pe.delete(
-          `https://book-sphere-1.onrender.com/api/books/${o}/${i}/book/${I}`,
+          `https://book-sphere-1.onrender.com/${o}/${i}/book/${I}`,
           { headers: { Authorization: `Bearer ${n}` } }
         ),
           alert("Book deleted successfully!"),
@@ -17558,7 +17556,7 @@ function nS({ token: n, role: o, id: i }) {
     De = async () => {
       try {
         const I = await pe.get(
-          `https://book-sphere-1.onrender.com/api/books/${o}/${i}/rentals/details`,
+          `https://book-sphere-1.onrender.com/${o}/${i}/rentals/details`,
           { headers: { Authorization: `Bearer ${n}` } }
         );
         w(I.data);
@@ -17570,7 +17568,7 @@ function nS({ token: n, role: o, id: i }) {
       console.log(P);
       try {
         await pe.post(
-          `https://book-sphere-1.onrender.com/api/books/${o}/${i}/book/add`,
+          `https://book-sphere-1.onrender.com/${o}/${i}/book/add`,
           {
             title: P.title,
             author: P.author,
@@ -18100,10 +18098,7 @@ function rS({ setRole: n, setToken: o, setId: i }) {
         return;
       }
       try {
-        const E = await pe.post(
-          "https://book-sphere-1.onrender.com/api/books/login",
-          s
-        );
+        const E = await pe.post("https://book-sphere-1.onrender.com/login", s);
         f(""),
           o(E.data.token),
           n(E.data.user.role),
@@ -18187,7 +18182,7 @@ function oS() {
       c.preventDefault();
       try {
         const y = await pe.post(
-          "https://book-sphere-1.onrender.com/api/books/register",
+          "https://book-sphere-1.onrender.com/register",
           n
         );
         console.log("Registration successful:", y.data), s("");
