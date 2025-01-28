@@ -46,73 +46,64 @@ function App() {
   return (
     <Router>
       {/* Navigation Bar */}
-      <nav className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white p-4 shadow-lg">
-        <div className="container mx-auto flex justify-between items-center">
-          {/* Logo and Brand Name */}
-          <div className="text-white text-2xl font-extrabold"></div>
+      <div className="container mx-auto flex justify-between items-center">
+        {/* Logo and Brand Name */}
+        <div className="text-white text-2xl font-extrabold"></div>
 
-          {/* Navigation Links */}
-          <div className="flex items-center space-x-6 text-white text-lg">
+        {/* Navigation Links */}
+        <div className="flex items-center space-x-6 text-white text-lg">
+          <Link
+            to="/"
+            className="hover:text-indigo-200 transition-colors duration-200"
+          ></Link>
+
+          {/* Only show login/register when not authenticated */}
+          {!token && (
+            <>
+              <Link
+                to="/login"
+                className="hover:text-indigo-200 transition-colors duration-200"
+              ></Link>
+              <Link
+                to="/register"
+                className="hover:text-indigo-200 transition-colors duration-200"
+              ></Link>
+            </>
+          )}
+
+          {/* Admin and User routes */}
+          {role === "admin" && (
             <Link
-              to="/"
+              to={`/admin/${id}`}
               className="hover:text-indigo-200 transition-colors duration-200"
             >
-              Home
+              {/* Admin */}
             </Link>
+          )}
 
-            {/* Only show login/register when not authenticated */}
-            {!token && (
-              <>
-                <Link
-                  to="/login"
-                  className="hover:text-indigo-200 transition-colors duration-200"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="hover:text-indigo-200 transition-colors duration-200"
-                >
-                  Register
-                </Link>
-              </>
-            )}
+          {role === "user" && id && (
+            <Link
+              to={`/user/${id}`}
+              className="hover:text-indigo-200 transition-colors duration-200"
+            >
+              {/* User Dashboard */}
+            </Link>
+          )}
 
-            {/* Admin and User routes */}
-            {role === "admin" && (
-              <Link
-                to="/admin"
-                className="hover:text-indigo-200 transition-colors duration-200"
-              >
-                Admin
-              </Link>
-            )}
-
-            {role === "user" && id && (
-              <Link
-                to={`/user/${id}`}
-                className="hover:text-indigo-200 transition-colors duration-200"
-              >
-                User Dashboard
-              </Link>
-            )}
-
-            {/* Logout button */}
-            {role && token && (
-              <button
-                onClick={logout}
-                className="bg-red-600 hover:bg-red-700 text-white py-1 px-4 rounded-lg transition-colors duration-300"
-              >
-                Logout
-              </button>
-            )}
-          </div>
+          {/* Logout button */}
+          {role && token && (
+            <button
+              onClick={logout}
+            >
+              {/* Logout */}
+            </button>
+          )}
         </div>
-      </nav>
+      </div>
 
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home role={role} id={id} />} />
         <Route path="/register" element={<Register />} />
         <Route
           path="/login"
@@ -123,7 +114,7 @@ function App() {
 
         {/* Admin Protected Route */}
         <Route
-          path="/admin"
+          path={`/admin/${id}`}
           element={
             role === "admin" && token ? (
               <Admin token={token} role={role} id={id} />

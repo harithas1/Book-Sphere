@@ -372,6 +372,19 @@ app.post("/user/:id/rentbook", authenticateToken, async (req, res) => {
       return res.status(400).json({ error: "No copies available for rent" });
     }
 
+    // Check if user already rented the book before
+    const existingRental = await pool.query(
+      "SELECT * FROM rentals WHERE customer_id = $1 AND book_id = $2",
+      [req.user.id, bookId]
+    );
+
+    if (existingRental.rows.length > 0) {
+      await pool.query("ROLLBACK");
+      return res
+        .status(409)
+        .json({ error: "Book already rented by the user." });
+    }
+
     // Insert rental record
     const rentalResult = await pool.query(
       "INSERT INTO rentals (customer_id, book_id) VALUES ($1, $2) RETURNING *",

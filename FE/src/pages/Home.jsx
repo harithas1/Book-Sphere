@@ -4,8 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { AlignJustify } from "lucide-react";
 import { useState } from "react";
 
-export const ResponsiveNavBar = () => {
+export const ResponsiveNavBar = ({ userId, userRole}) => {
   const [isMobile, setIsMobile] = useState(false);
+
+  const navigate = useNavigate();
 
   return (
     <header className="w-full p-4 bg-gray-900 text-white flex justify-between items-center border-b border-gray-700">
@@ -58,11 +60,20 @@ export const ResponsiveNavBar = () => {
                 Contact
               </a>
             </li>
-            {/* <li>
+            {userRole && userId && (
+              <li>
+                <a
+                  onClick={() => navigate(`/${userRole}/${userId}`)}
+                  className="text-lg font-semibold hover:text-teal-400 transition"
+                >
+                  Dashboard
+                </a>
+              </li>
+            )}
+            <li>
               <a
-                href="/login"
                 className="text-lg font-semibold hover:text-teal-400 transition"
-                onClick={() => setIsMobile(false)}
+                onClick={() => navigate("/login")}
               >
                 Login
               </a>
@@ -71,11 +82,11 @@ export const ResponsiveNavBar = () => {
               <a
                 href="/register"
                 className="text-lg font-semibold hover:text-teal-400 transition"
-                onClick={() => setIsMobile(false)}
+                onClick={() => navigate("/register")}
               >
                 Register
               </a>
-            </li> */}
+            </li>
           </ul>
         </nav>
       )}
@@ -98,23 +109,42 @@ export const ResponsiveNavBar = () => {
               Contact
             </a>
           </li>
-          {/* <li>
-            <a href="/login" className="hover:text-teal-400 transition">
+          {userRole && userId && (
+            <li>
+              <a
+                onClick={() => navigate(`/${userRole}/${userId}`)}
+                className="text-lg font-semibold hover:text-teal-400 transition"
+              >
+                Dashboard
+              </a>
+            </li>
+          )}
+          <li>
+            <a
+              className="text-lg font-semibold hover:text-teal-400 transition"
+              onClick={() => navigate("/login")}
+            >
               Login
             </a>
           </li>
           <li>
-            <a href="/register" className="hover:text-teal-400 transition">
+            <a
+              href="/register"
+              className="text-lg font-semibold hover:text-teal-400 transition"
+              onClick={() => navigate("/register")}
+            >
               Register
             </a>
-          </li> */}
+          </li>
         </ul>
       </nav>
     </header>
   );
 };
 
-const Home = () => {
+const Home = ({role, id }) => {
+  const userId = id ? id : null;
+  const userRole = role ? role : null;
   const navigate = useNavigate();
   // const [ismobile, setIsmobile]=useState(false)
 
@@ -122,7 +152,7 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex flex-col items-center p-4">
       {/* Header Section */}
       {/* <header className="w-full py-6 px-6 border-b border-gray-700"> */}
-      <ResponsiveNavBar />
+      <ResponsiveNavBar userId={userId} userRole={userRole} />
 
       {/* Hero Section */}
       <section className="w-full py-20 px-6 text-center">
