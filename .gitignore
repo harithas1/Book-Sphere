@@ -1,7 +1,5 @@
 # Node.js / JavaScript dependencies and build artifacts
 /node_modules/
-/dist/
-/build/
 
 # Logs
 *.log
