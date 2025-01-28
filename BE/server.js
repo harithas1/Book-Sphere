@@ -63,6 +63,9 @@ const pool = new Pool({
     returned BOOLEAN DEFAULT FALSE
       );
     `;
+
+
+
     await pool.query(createCustomersTable);
     await pool.query(createBooksTable);
     await pool.query(createRentalTable);
@@ -345,6 +348,9 @@ app.post("/user/:id/rentbook", authenticateToken, async (req, res) => {
   const { bookId } = req.body;
 
   try {
+    // Begin the transaction
+    await pool.query("BEGIN");
+
     // Check if book exists and lock the row for update
     const bookResult = await pool.query(
       "SELECT * FROM books WHERE id = $1 FOR UPDATE",
@@ -352,16 +358,16 @@ app.post("/user/:id/rentbook", authenticateToken, async (req, res) => {
     );
 
     if (bookResult.rows.length === 0) {
+      await pool.query("ROLLBACK");
       return res.status(404).json({ error: "Book not found" });
     }
 
     const book = bookResult.rows[0];
+
     if (book.available_copies <= 0) {
+      await pool.query("ROLLBACK");
       return res.status(400).json({ error: "No copies available for rent" });
     }
-
-    // Begin the transaction
-    await pool.query("BEGIN");
 
     // Insert rental record
     const rentalResult = await pool.query(
@@ -369,10 +375,21 @@ app.post("/user/:id/rentbook", authenticateToken, async (req, res) => {
       [req.user.id, bookId]
     );
 
+    // Update book record (decrease available copies, increase rented copies)
+    await pool.query(
+      "UPDATE books SET rented_copies = rented_copies + 1, available_copies = available_copies - 1 WHERE id = $1",
+      [bookId]
+    );
+
     // Commit the transaction
     await pool.query("COMMIT");
-    res.status(201).json(rentalResult.rows[0]);
+
+    res.status(201).json({
+      message: "Book rented successfully",
+      rental: rentalResult.rows[0],
+    });
   } catch (err) {
+    // Rollback transaction in case of error
     await pool.query("ROLLBACK");
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
