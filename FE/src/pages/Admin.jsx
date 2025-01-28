@@ -29,13 +29,13 @@ export default function AdminPanel({ token, role, id }) {
     genre: "",
     copies: "",
     price: "",
-  })
-  const [isadding, setIsAdding]= useState(false)
+  });
+  const [isadding, setIsAdding] = useState(false);
 
   // Fetch admin data
   const fetchAdmin = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/${role}/${id}`, {
+      const response = await axios.get(`http://localhost:5001/${role}/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAdmin(response.data);
@@ -48,7 +48,7 @@ export default function AdminPanel({ token, role, id }) {
   const fetchUsersData = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/${role}/${id}/users`,
+        `http://localhost:5001/${role}/${id}/users`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setUsers(response.data);
@@ -60,7 +60,7 @@ export default function AdminPanel({ token, role, id }) {
   const handleUserDetails = async () => {
     try {
       await axios.put(
-        `http://localhost:5000/${role}/${id}/user/edit/${editUser.id}`,
+        `http://localhost:5001/${role}/${id}/user/edit/${editUser.id}`,
         editUser,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -75,7 +75,7 @@ export default function AdminPanel({ token, role, id }) {
   const fetchBooks = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/${role}/${id}/books`,
+        `http://localhost:5001/${role}/${id}/books`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log(response.data);
@@ -118,7 +118,7 @@ export default function AdminPanel({ token, role, id }) {
 
     try {
       await axios.put(
-        `http://localhost:5000/${role}/${id}/book/edit/${editBook.id}`,
+        `http://localhost:5001/${role}/${id}/book/edit/${editBook.id}`,
         {
           title: editBook.title,
           author: editBook.author,
@@ -139,7 +139,7 @@ export default function AdminPanel({ token, role, id }) {
   // Delete book
   const handleDeleteBook = async (bookId) => {
     try {
-      await axios.delete(`http://localhost:5000/${role}/${id}/book/${bookId}`, {
+      await axios.delete(`http://localhost:5001/${role}/${id}/book/${bookId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Book deleted successfully!");
@@ -153,7 +153,7 @@ export default function AdminPanel({ token, role, id }) {
   const fetchRentals = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/${role}/${id}/rentals/details`,
+        `http://localhost:5001/${role}/${id}/rentals/details`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setRentals(response.data);
@@ -164,16 +164,16 @@ export default function AdminPanel({ token, role, id }) {
 
   const handleAddBook = async () => {
     console.log(addBook);
-    
+
     try {
       await axios.post(
-        `http://localhost:5000/${role}/${id}/book/add`,
+        `http://localhost:5001/${role}/${id}/book/add`,
         {
-          title:addBook.title,
-          author:addBook.author,
-          genre:addBook.genre,
-          copies:addBook.copies,
-          price:addBook.price
+          title: addBook.title,
+          author: addBook.author,
+          genre: addBook.genre,
+          copies: addBook.copies,
+          price: addBook.price,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -184,8 +184,8 @@ export default function AdminPanel({ token, role, id }) {
         genre: "",
         copies: "",
         price: "",
-      })
-      setIsAdding(false)
+      });
+      setIsAdding(false);
       fetchBooks();
     } catch (err) {
       console.error(err);
@@ -292,7 +292,7 @@ export default function AdminPanel({ token, role, id }) {
           <section className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold mb-4">All Books</h2>
             <CirclePlus
-              onClick={()=>(handleAddBook,setIsAdding(!isadding))}
+              onClick={() => (handleAddBook, setIsAdding(!isadding))}
               className="cursor-pointer text-teal-600 hover:text-teal-800 transition-all size-12"
             />
           </section>
@@ -493,7 +493,10 @@ export default function AdminPanel({ token, role, id }) {
       )}
 
       {isadding && (
-        <Dialog open={Boolean(isadding)} onOpenChange={() => setIsAdding(false)}>
+        <Dialog
+          open={Boolean(isadding)}
+          onOpenChange={() => setIsAdding(false)}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New Book</DialogTitle>

@@ -1,7 +1,7 @@
 const { Pool } = require("pg");
 const express = require("express");
 const app = express();
-const PORT = 5000;
+const PORT = 5001;
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
@@ -580,7 +580,6 @@ app.get(
   }
 );
 
-
 // / add book (Admin)
 
 app.post(
@@ -609,9 +608,3 @@ app.use("/admin", authenticateToken, authorizeAdmin);
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-
-
-
-
-

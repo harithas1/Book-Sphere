@@ -13,7 +13,7 @@ const User = ({ token, role, id }) => {
   // Fetch user data when the component mounts
   const fetchUserData = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/user/${id}`, {
+      const response = await axios.get(`http://localhost:5001/user/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -27,13 +27,11 @@ const User = ({ token, role, id }) => {
     }
   };
 
- 
-
   // Fetch user's rental history
   const fetchUserHistory = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/user/${id}/rentals`,
+        `http://localhost:5001/user/${id}/rentals`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -42,23 +40,24 @@ const User = ({ token, role, id }) => {
       );
       setHistory(response.data);
       console.log(response.data);
-      
     } catch (err) {
       setError(err.message);
     }
-    
   };
 
   // Fetch available books for rent
   const fetchAvailableBooks = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/user/${id}/books`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `http://localhost:5001/user/${id}/books`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       console.log(response.data);
-      
+
       setAvailableBooks(response.data);
     } catch (err) {
       setError(err.message);
@@ -69,7 +68,7 @@ const User = ({ token, role, id }) => {
     setIsRenting(true);
     try {
       await axios.post(
-        `http://localhost:5000/user/${id}/rentbook`,
+        `http://localhost:5001/user/${id}/rentbook`,
         { bookId },
         {
           headers: {
@@ -185,7 +184,9 @@ const User = ({ token, role, id }) => {
                   <p className="font-semibold text-gray-700">
                     Book Title: {rental.book_title}
                   </p>
-                  <p>Rent Date: {new Date(rental.rent_date).toLocaleDateString()}</p>
+                  <p>
+                    Rent Date: {new Date(rental.rent_date).toLocaleDateString()}
+                  </p>
                   <p>
                     Return Date:{" "}
                     {rental.return_date
