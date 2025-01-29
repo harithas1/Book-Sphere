@@ -491,19 +491,26 @@ app.get("/admin/:id", authenticateToken, authorizeAdmin, async (req, res) => {
 });
 
 // Endpoint to get all users
-// search by names also
+// search by name
 app.get(
   "/admin/:id/users/:search",
   authenticateToken,
   authorizeAdmin,
   async (req, res) => {
     const { search } = req.params;
-
+    if (search !== "all") {
+      try {
+        const result = await pool.query(
+          "SELECT * FROM customers WHERE name ILIKE '%' || $1 || '%'",
+          [search]
+        );
+        res.status(200).json(result.rows);
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+  } else {
     try {
-      const result = await pool.query(
-        `SELECT * FROM customers WHERE name ILIKE '%' || $1 || '%'`,
-        [search]
-      );
+      const result = await pool.query("SELECT * FROM customers");
       res.status(200).json(result.rows);
     } catch (err) {
       res.status(500).json({ error: err.message });
