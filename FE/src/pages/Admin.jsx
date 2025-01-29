@@ -18,21 +18,8 @@ export default function Admin({ token, role, id }) {
   const [books, setBooks] = useState([]);
   const [rentals, setRentals] = useState([]);
   const [activeTab, setActiveTab] = useState("adminDetails");
-  const [genres, setGenres] = useState([]);
-  //  "genres": [
-  //       "Historical Fiction",
-  //       "Poetry",
-  //       "Novel",
-  //       "Fantasy",
-  //       "Epic",
-  //       "Science Fiction",
-  //       "Drama",
-  //       "Comic",
-  //       "Historical",
-  //       "Thriller",
-  //       "Fiction",
-  //       "Autobiography"
-  //   ]
+  const [genres, setGenres] = useState(["all"]);
+  
 
   // State for modal/dialog
   const [editBook, setEditBook] = useState(null);
@@ -67,7 +54,7 @@ export default function Admin({ token, role, id }) {
   // Fetch users, books, rentals data
   const fetchUsersData = async (selectedUserName) => {
     console.log(selectedUserName);
-    
+
     try {
       const response = await axios.get(
         `https://book-sphere-1.onrender.com/${role}/${id}/users/${selectedUserName}`,
@@ -106,7 +93,7 @@ export default function Admin({ token, role, id }) {
       );
       console.log(response.data.books);
       setBooks(response.data.books);
-      setGenres(response.data.genres);
+      setGenres(["all", ...response.data.genres]);
     } catch (err) {
       console.error(err);
     }
@@ -115,8 +102,6 @@ export default function Admin({ token, role, id }) {
   useEffect(() => {
     fetchBooks(selectedGenre);
   }, [selectedGenre]);
-
-
 
   // Update book details
   const handleUpdateBook = async () => {
@@ -310,16 +295,19 @@ export default function Admin({ token, role, id }) {
         <TabsContent value="books">
           <section className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold mb-4">All Books</h2>
-           {genres.forEach((genre) => (
+
             <select
-              className="border border-gray-300 px-2 rounded-md"
+              name="genres"
               onChange={(e) => setSelectedGenre(e.target.value)}
+              className="px-4 py-2"
+              id=""
             >
-              <option value={genre}>{genre}</option>
+              {genres.map((genre) => (
+                <option key={genre} value={genre}>
+                  {genre}
+                </option>
+              ))}
             </select>
-           ))}
-          
-            
             <CirclePlus
               onClick={() => (handleAddBook, setIsAdding(!isadding))}
               className="cursor-pointer text-teal-600 hover:text-teal-800 transition-all size-12"
@@ -452,19 +440,21 @@ export default function Admin({ token, role, id }) {
             />
             <Input
               type="number"
+              min="1"
               value={editBook.price}
               onChange={(e) =>
-                setEditBook({ ...editBook, price: parseInt(e.target.value) })
+                setEditBook({ ...editBook, price: e.target.value })
               }
               placeholder="Price"
             />
             <Input
               type="number"
+              min="1"
               value={editBook.copies}
               onChange={(e) =>
                 setEditBook({
                   ...editBook,
-                  copies: parseInt(e.target.value),
+                  copies: e.target.value,
                   id: editBook.id,
                 })
               }

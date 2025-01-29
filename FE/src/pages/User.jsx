@@ -64,9 +64,10 @@ const User = ({ token, role, id }) => {
           },
         }
       );
-      console.log(response.data);
+      console.log(response.data.books);
 
-      setAvailableBooks(response.data);
+      setAvailableBooks(response.data.books);
+      setSelectedCategory(response.data.genres)
     } catch (err) {
       setError(err.message);
     }
@@ -115,6 +116,17 @@ const User = ({ token, role, id }) => {
   }, [token, id, selectedCategory]);
 
 
+  const handleLogout = () => {
+    // Clear user-specific data from localStorage
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("id");
+
+    // Optionally, clear any user-specific state here (if you use state to store these values)
+
+    // Redirect to the homepage or login page
+    navigate("/");
+  };
 
 
 
@@ -141,7 +153,7 @@ const User = ({ token, role, id }) => {
         <h1 className="text-3xl font-bold mb-4">
           Welcome <span className="text-teal-500">{userData.name}!</span>
         </h1>
-        <Button variant="destructive" onClick={() => navigate("/")}>
+        <Button variant="destructive" onClick={handleLogout}>
           logout
         </Button>
       </section>
@@ -235,20 +247,7 @@ const User = ({ token, role, id }) => {
             "Historical" "Fantasy" "Fantasy" "Historical Fiction" "Historical
             Fiction" "Historical Fiction" "Novel" "Science Fiction" "Science
             Fiction" "Science Fiction" "Thriller" "Thriller" */}
-            <select value={selectedCategory} onChange={(e)=> setSelectedCategory(e.target.value)}>
-              <option value="all">All</option>
-              <option value="Poetry">Poetry</option>
-              <option value="Novel">Novel</option>
-              <option value="Drama">Drama</option>
-              <option value="Autobiography">Autobiography</option>
-              <option value="Epic">Epic</option>
-              <option value="Historical">Historical</option>
-              <option value="Fantasy">Fantasy</option>
-              <option value="Historical Fiction">Historical Fiction</option>
-              <option value="Science Fiction">Science Fiction</option>
-              <option value="Thriller">Thriller</option>
-
-            </select>
+            
           </section>
           {availableBooks.length > 0 ? (
             <ul className="space-y-4">

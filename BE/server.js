@@ -187,11 +187,13 @@ app.post("/register", async (req, res) => {
 
 // Login User
 app.post("/login", async (req, res) => {
+  console.log(req.body);
   const loginSchema = Joi.object({
     name: Joi.string().required(),
     password: Joi.string().required(),
     role: Joi.string().valid("user", "admin").required(),
   });
+  console.log("hello");
 
   const { error } = loginSchema.validate(req.body);
   if (error) {
@@ -282,16 +284,18 @@ app.put("/user/:id", authenticateToken, async (req, res) => {
 //  View Books for Rent (/books) for User
 app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
   const { genre } = req.params;
+  const getGenres = await pool.query(
+    "SELECT DISTINCT genre FROM books WHERE available_copies > 0"
+  );
+  const allGenres = getGenres.rows.map((row) => row.genre);
+  console.log(allGenres);
   if (genre !== "all") {
     try {
       const result = await pool.query(
         "SELECT id, title, author, genre, price, available_copies FROM books WHERE genre = $1 AND available_copies > 0",
         [genre]
       );
-      const allGenres = await pool.query(
-        "SELECT DISTINCT genre FROM books WHERE available_copies > 0"
-      );
-      res.status(200).json({ books: result.rows, genres: allGenres.rows });
+      res.status(200).json({ books: result.rows, genres: allGenres});
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Internal server error" });
@@ -301,7 +305,7 @@ app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
       const result = await pool.query(
         "SELECT id, title, author, genre, price, available_copies FROM books WHERE available_copies > 0"
       );
-      res.status(200).json(result.rows);
+        res.status(200).json({ books: result.rows, genres: allGenres });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Internal server error" });
@@ -559,7 +563,7 @@ app.get(
     );
     const allGenres = getGenres.rows.map((row) => row.genre);
     console.log(allGenres);
-    
+
     // search by genre
     if (genre !== "all") {
       try {

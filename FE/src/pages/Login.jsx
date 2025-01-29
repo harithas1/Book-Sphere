@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import bookloginbg from "../assets/bookloginbg.avif";
 
-export default function Login({ setRole, setToken, setId}) {
+export default function Login({ setRole, setToken, setId }) {
   const [form, setForm] = useState({
     name: "",
     password: "",
@@ -11,7 +10,6 @@ export default function Login({ setRole, setToken, setId}) {
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,7 +46,7 @@ export default function Login({ setRole, setToken, setId}) {
 
       // Navigate to the appropriate page
       if (response.data.user.role === "admin") {
-        navigate("/admin");
+        navigate(`/admin/${response.data.user.id}`);
       } else {
         navigate(`/user/${response.data.user.id}`);
       }

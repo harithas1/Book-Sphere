@@ -16,7 +16,6 @@ function App() {
   const [token, setToken] = useState(""); // Token state for authentication
   const [role, setRole] = useState(""); // Role state (user/admin)
   const [id, setId] = useState(""); // User ID for personalized access
-  const [activeTab, setActiveTab] = useState("details");
 
   const logout = () => {
     // Clear authentication state on logout
@@ -46,7 +45,7 @@ function App() {
   return (
     <Router>
       {/* Navigation Bar */}
-      <div className="container mx-auto flex justify-between items-center">
+      <div className="container mx-auto flex justify-between">
         {/* Logo and Brand Name */}
         <div className="text-white text-2xl font-extrabold"></div>
 
@@ -91,13 +90,7 @@ function App() {
           )}
 
           {/* Logout button */}
-          {role && token && (
-            <button
-              onClick={logout}
-            >
-              {/* Logout */}
-            </button>
-          )}
+          {role && token && <button onClick={logout}>{/* Logout */}</button>}
         </div>
       </div>
 
@@ -114,7 +107,7 @@ function App() {
 
         {/* Admin Protected Route */}
         <Route
-          path={`/admin/${id}`}
+          path="/admin/:id"
           element={
             role === "admin" && token ? (
               <Admin token={token} role={role} id={id} />
@@ -128,7 +121,7 @@ function App() {
 
         {/* User Protected Route */}
         <Route
-          path={`/user/${id}`}
+          path="/user/:id"
           element={
             role === "user" && token && id ? (
               <User token={token} role={role} id={id} />
