@@ -52,7 +52,7 @@ export default function AdminPanel({ token, role, id }) {
   // Fetch users, books, rentals data
   const fetchUsersData = async (selectedUserName) => {
     console.log(selectedUserName);
-    
+
     try {
       const response = await axios.get(
         `https://book-sphere-1.onrender.com/${role}/${id}/users/${selectedUserName}`,
@@ -99,8 +99,6 @@ export default function AdminPanel({ token, role, id }) {
   useEffect(() => {
     fetchBooks(selectedGenre);
   }, [selectedGenre]);
-
-
 
   // Update book details
   const handleUpdateBook = async () => {
@@ -179,7 +177,7 @@ export default function AdminPanel({ token, role, id }) {
         price: "",
       });
       setIsAdding(false);
-      fetchBooks( selectedGenre);
+      fetchBooks(selectedGenre);
     } catch (err) {
       console.error(err);
       alert("Failed to add book.");
@@ -188,7 +186,7 @@ export default function AdminPanel({ token, role, id }) {
 
   useEffect(() => {
     fetchAdmin();
-    fetchUsersData();
+    fetchUsersData(selectedUserName);
     fetchBooks(selectedGenre);
     fetchRentals();
   }, []);
