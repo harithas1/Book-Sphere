@@ -95,7 +95,7 @@ export default function Login({ setRole, setToken, setId}) {
           >
             Login
           </button>
-          <a className="text-white" href="/register">
+          <a className="text-white" onClick={() => navigate("/register")}>
             Register
           </a>
         </form>
