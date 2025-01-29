@@ -237,7 +237,7 @@ export default function AdminPanel({ token, role, id }) {
         </TabsContent>
 
         <TabsContent value="usersDetails">
-          <section className="mb-4  flex justify-between ">
+          <section className="mb-4 flex justify-between ">
             <h2 className="text-2xl font-semibold mb-4">Customers Details</h2>
             <input
               // value={selectedUserName}

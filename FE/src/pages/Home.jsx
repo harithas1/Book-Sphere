@@ -81,7 +81,6 @@ export const ResponsiveNavBar = ({ userId, userRole}) => {
             </li>
             <li>
               <a
-                href="/register"
                 className="text-lg font-semibold hover:text-teal-400 transition"
                 onClick={() => navigate("/register")}
               >
@@ -130,7 +129,6 @@ export const ResponsiveNavBar = ({ userId, userRole}) => {
           </li>
           <li>
             <a
-              href="/register"
               className="text-lg font-semibold hover:text-teal-400 transition"
               onClick={() => navigate("/register")}
             >
