@@ -491,19 +491,22 @@ app.get("/admin/:id", authenticateToken, authorizeAdmin, async (req, res) => {
 });
 
 // Endpoint to get all users
+// search by names also
 app.get(
-  "/admin/:id/users",
+  "/admin/:id/users/:search",
   authenticateToken,
   authorizeAdmin,
   async (req, res) => {
+    const { search } = req.params;
+
     try {
-      const result = await pool.query("SELECT * FROM customers");
-      // decode password
-      const password = bcrypt.hashSync(result.rows[0].password, 10);
-      res.status(200).json(result.rows.map((row) => ({ ...row, password })));
+      const result = await pool.query(
+        `SELECT * FROM customers WHERE name ILIKE '%' || $1 || '%'`,
+        [search]
+      );
+      res.status(200).json(result.rows);
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
+      res.status(500).json({ error: err.message });
     }
   }
 );
@@ -535,20 +538,36 @@ app.put(
 
 // Get All Books (Admin)
 app.get(
-  "/admin/:id/books",
+  "/admin/:id/books/:genre",
   authenticateToken,
   authorizeAdmin,
   async (req, res) => {
-    try {
-      const result = await pool.query(
-        "SELECT id, title, author, genre, price, copies, available_copies FROM books"
-      );
+    const { genre } = req.params;
+    if(genre !== "all"){
+      try {
+        const result = await pool.query(
+          "SELECT id, title, author, genre, price, copies, available_copies FROM books WHERE genre = $1 AND available_copies > 0",
+          [genre]
+        );
+        res.status(200).json(result.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal server error" });
+      }
 
-      res.status(200).json(result.rows);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
+    }else {
+      try {
+        const result = await pool.query(
+          "SELECT id, title, author, genre, price, copies, available_copies FROM books"
+        );
+
+        res.status(200).json(result.rows);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal server error" });
+      }
     }
+      
   }
 );
 

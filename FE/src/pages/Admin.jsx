@@ -31,6 +31,8 @@ export default function AdminPanel({ token, role, id }) {
     price: "",
   });
   const [isadding, setIsAdding] = useState(false);
+  const [selectedGenre, setSelectedGenre] = useState("all");
+  const [selectedUserName, setSelectedUserName] = useState("all");
 
   // Fetch admin data
   const fetchAdmin = async () => {
@@ -48,10 +50,12 @@ export default function AdminPanel({ token, role, id }) {
   };
 
   // Fetch users, books, rentals data
-  const fetchUsersData = async () => {
+  const fetchUsersData = async (selectedUserName) => {
+    console.log(selectedUserName);
+    
     try {
       const response = await axios.get(
-        `https://book-sphere-1.onrender.com/${role}/${id}/users`,
+        `https://book-sphere-1.onrender.com/${role}/${id}/users/${selectedUserName}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setUsers(response.data);
@@ -59,6 +63,10 @@ export default function AdminPanel({ token, role, id }) {
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    fetchUsersData(selectedUserName);
+  }, [selectedUserName]);
 
   const handleUserDetails = async () => {
     try {
@@ -75,10 +83,10 @@ export default function AdminPanel({ token, role, id }) {
     }
   };
 
-  const fetchBooks = async () => {
+  const fetchBooks = async (selectedGenre) => {
     try {
       const response = await axios.get(
-        `https://book-sphere-1.onrender.com/${role}/${id}/books`,
+        `https://book-sphere-1.onrender.com/${role}/${id}/books/${selectedGenre}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log(response.data);
@@ -88,32 +96,11 @@ export default function AdminPanel({ token, role, id }) {
     }
   };
 
-  // app.put(
-  //   "/admin/:id/book/:bookId",
-  //   authenticateToken,
-  //   authorizeAdmin,
-  //   bookValidate,
-  //   async (req, res) => {
-  //     const { bookId } = req.params;
-  //     const { title, author, genre, price, copies } = req.body;
-  //     console.log(bookId, title, author, genre, price, copies);
+  useEffect(() => {
+    fetchBooks(selectedGenre);
+  }, [selectedGenre]);
 
-  //     try {
-  //       const result = await pool.query(
-  //         `UPDATE books SET title = $1, author = $2, genre = $3, price = $4, copies = $5 WHERE id = $6`,
-  //         [title, author, genre, price, copies, bookId]
-  //       );
 
-  //       if (result.rowCount === 0) {
-  //         return res.status(404).json({ error: "Book not found" });
-  //       }
-  //       res.status(200).json({ message: "Book updated successfully" });
-  //     } catch (err) {
-  //       console.error(err);
-  //       res.status(500).json({ error: "Internal server error" });
-  //     }
-  //   }
-  // );
 
   // Update book details
   const handleUpdateBook = async () => {
@@ -149,7 +136,7 @@ export default function AdminPanel({ token, role, id }) {
         }
       );
       alert("Book deleted successfully!");
-      fetchBooks();
+      fetchBooks(selectedGenre);
     } catch (err) {
       console.error(err);
       alert("Failed to delete book.");
@@ -192,7 +179,7 @@ export default function AdminPanel({ token, role, id }) {
         price: "",
       });
       setIsAdding(false);
-      fetchBooks();
+      fetchBooks( selectedGenre);
     } catch (err) {
       console.error(err);
       alert("Failed to add book.");
@@ -202,7 +189,7 @@ export default function AdminPanel({ token, role, id }) {
   useEffect(() => {
     fetchAdmin();
     fetchUsersData();
-    fetchBooks();
+    fetchBooks(selectedGenre);
     fetchRentals();
   }, []);
 
@@ -252,7 +239,17 @@ export default function AdminPanel({ token, role, id }) {
         </TabsContent>
 
         <TabsContent value="usersDetails">
-          <h2 className="text-2xl font-semibold mb-4">Customers Details</h2>
+          <section className="mb-4  flex justify-between ">
+            <h2 className="text-2xl font-semibold mb-4">Customers Details</h2>
+            <input
+              // value={selectedUserName}
+              className="border border-gray-300 px-2 rounded-md"
+              onChange={(e) => setSelectedUserName(e.target.value)}
+              type="text"
+              placeholder="🔍 Search"
+            />
+          </section>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {users.map((user) => (
               <Card key={user.id} className="p-4 flex ">
@@ -297,6 +294,27 @@ export default function AdminPanel({ token, role, id }) {
         <TabsContent value="books">
           <section className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold mb-4">All Books</h2>
+            <select
+              name="genres"
+              onChange={(e) => setSelectedGenre(e.target.value)}
+              className="px-4 py-2"
+              id=""
+            >
+              <option value="all">All</option>
+              <option value="action">Action</option>
+              <option value="adventure">Adventure</option>
+              <option value="biography">Biography</option>
+              <option value="comedy">Comedy</option>
+              <option value="crime">Crime</option>
+              <option value="drama">Drama</option>
+              <option value="fantasy">Fantasy</option>
+              <option value="history">History</option>
+              <option value="horror">Horror</option>
+              <option value="mystery">Mystery</option>
+              <option value="romance">Romance</option>
+              <option value="science-fiction">Science Fiction</option>
+              <option value="thriller">Thriller</option>
+            </select>
             <CirclePlus
               onClick={() => (handleAddBook, setIsAdding(!isadding))}
               className="cursor-pointer text-teal-600 hover:text-teal-800 transition-all size-12"

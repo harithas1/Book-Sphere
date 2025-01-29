@@ -11,6 +11,7 @@ const User = ({ token, role, id }) => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("details");
   const [isRenting, setIsRenting] = useState({});
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const navigate = useNavigate();
 
@@ -85,7 +86,7 @@ const User = ({ token, role, id }) => {
         }
       );
       alert("Book borrowed successfully!");
-      fetchAvailableBooks("all");
+      fetchAvailableBooks(selectedCategory);
       fetchUserHistory();
     } catch (err) {
       setError(err.message);
@@ -102,7 +103,7 @@ const User = ({ token, role, id }) => {
         try {
           await fetchUserData(); // First fetch the user data
           await fetchUserHistory(); // Then fetch the rental history
-          await fetchAvailableBooks("all"); // Finally fetch available books
+          await fetchAvailableBooks(selectedCategory); // Finally fetch available books
         } catch (err) {
           setError(err.message);
         } finally {
@@ -111,7 +112,7 @@ const User = ({ token, role, id }) => {
       };
       fetchData();
     }
-  }, [token, id]);
+  }, [token, id, selectedCategory]);
 
 
 
@@ -234,7 +235,7 @@ const User = ({ token, role, id }) => {
             "Historical" "Fantasy" "Fantasy" "Historical Fiction" "Historical
             Fiction" "Historical Fiction" "Novel" "Science Fiction" "Science
             Fiction" "Science Fiction" "Thriller" "Thriller" */}
-            <select value="all" onChange={(e)=>fetchAvailableBooks(e.target.value)}>
+            <select value={selectedCategory} onChange={(e)=> setSelectedCategory(e.target.value)}>
               <option value="all">All</option>
               <option value="Poetry">Poetry</option>
               <option value="Novel">Novel</option>
