@@ -288,7 +288,10 @@ app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
         "SELECT id, title, author, genre, price, available_copies FROM books WHERE genre = $1 AND available_copies > 0",
         [genre]
       );
-      res.status(200).json(result.rows);
+      const allGenres = await pool.query(
+        "SELECT DISTINCT genre FROM books WHERE available_copies > 0"
+      );
+      res.status(200).json({ books: result.rows, genres: allGenres.rows });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Internal server error" });
@@ -508,14 +511,14 @@ app.get(
       } catch (err) {
         res.status(500).json({ error: err.message });
       }
-  } else {
-    try {
-      const result = await pool.query("SELECT * FROM customers");
-      res.status(200).json(result.rows);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
+    } else {
+      try {
+        const result = await pool.query("SELECT * FROM customers");
+        res.status(200).json(result.rows);
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
     }
-  }
   }
 );
 
@@ -551,31 +554,37 @@ app.get(
   authorizeAdmin,
   async (req, res) => {
     const { genre } = req.params;
-    if(genre !== "all"){
+    const getGenres = await pool.query(
+      "SELECT DISTINCT genre FROM books WHERE available_copies > 0"
+    );
+    const allGenres = getGenres.rows.map((row) => row.genre);
+    console.log(allGenres);
+    
+    // search by genre
+    if (genre !== "all") {
       try {
         const result = await pool.query(
           "SELECT id, title, author, genre, price, copies, available_copies FROM books WHERE genre = $1 AND available_copies > 0",
           [genre]
         );
-        res.status(200).json(result.rows);
+
+        res.status(200).json({ books: result.rows, genres: allGenres });
       } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Internal server error" });
       }
-
-    }else {
+    } else {
       try {
         const result = await pool.query(
           "SELECT id, title, author, genre, price, copies, available_copies FROM books"
         );
 
-        res.status(200).json(result.rows);
+        res.status(200).json({ books: result.rows, genres: allGenres });
       } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Internal server error" });
       }
     }
-      
   }
 );
 

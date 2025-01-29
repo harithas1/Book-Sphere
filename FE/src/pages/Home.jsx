@@ -21,7 +21,7 @@ export const ResponsiveNavBar = ({ userId, userRole}) => {
 
         {/* Mobile Menu Icon */}
         <AlignJustify
-          className="text-white pl hover:text-teal-400 cursor-pointer transition-all md:hidden"
+          className="text-white hover:text-teal-400 cursor-pointer transition-all md:hidden"
           onClick={() => setIsMobile(!isMobile)}
           size={32} // Adjust size for visibility
         />

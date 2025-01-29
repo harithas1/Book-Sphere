@@ -12,12 +12,27 @@ import {
 } from "@/components/ui/dialog";
 import { CirclePlus } from "lucide-react";
 
-export default function AdminPanel({ token, role, id }) {
+export default function Admin({ token, role, id }) {
   const [admin, setAdmin] = useState([]);
   const [users, setUsers] = useState([]);
   const [books, setBooks] = useState([]);
   const [rentals, setRentals] = useState([]);
   const [activeTab, setActiveTab] = useState("adminDetails");
+  const [genres, setGenres] = useState([]);
+  //  "genres": [
+  //       "Historical Fiction",
+  //       "Poetry",
+  //       "Novel",
+  //       "Fantasy",
+  //       "Epic",
+  //       "Science Fiction",
+  //       "Drama",
+  //       "Comic",
+  //       "Historical",
+  //       "Thriller",
+  //       "Fiction",
+  //       "Autobiography"
+  //   ]
 
   // State for modal/dialog
   const [editBook, setEditBook] = useState(null);
@@ -52,7 +67,7 @@ export default function AdminPanel({ token, role, id }) {
   // Fetch users, books, rentals data
   const fetchUsersData = async (selectedUserName) => {
     console.log(selectedUserName);
-
+    
     try {
       const response = await axios.get(
         `https://book-sphere-1.onrender.com/${role}/${id}/users/${selectedUserName}`,
@@ -89,8 +104,9 @@ export default function AdminPanel({ token, role, id }) {
         `https://book-sphere-1.onrender.com/${role}/${id}/books/${selectedGenre}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log(response.data);
-      setBooks(response.data);
+      console.log(response.data.books);
+      setBooks(response.data.books);
+      setGenres(response.data.genres);
     } catch (err) {
       console.error(err);
     }
@@ -99,6 +115,8 @@ export default function AdminPanel({ token, role, id }) {
   useEffect(() => {
     fetchBooks(selectedGenre);
   }, [selectedGenre]);
+
+
 
   // Update book details
   const handleUpdateBook = async () => {
@@ -292,27 +310,16 @@ export default function AdminPanel({ token, role, id }) {
         <TabsContent value="books">
           <section className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold mb-4">All Books</h2>
+           {genres.forEach((genre) => (
             <select
-              name="genres"
+              className="border border-gray-300 px-2 rounded-md"
               onChange={(e) => setSelectedGenre(e.target.value)}
-              className="px-4 py-2"
-              id=""
             >
-              <option value="all">All</option>
-              <option value="action">Action</option>
-              <option value="adventure">Adventure</option>
-              <option value="biography">Biography</option>
-              <option value="comedy">Comedy</option>
-              <option value="crime">Crime</option>
-              <option value="drama">Drama</option>
-              <option value="fantasy">Fantasy</option>
-              <option value="history">History</option>
-              <option value="horror">Horror</option>
-              <option value="mystery">Mystery</option>
-              <option value="romance">Romance</option>
-              <option value="science-fiction">Science Fiction</option>
-              <option value="thriller">Thriller</option>
+              <option value={genre}>{genre}</option>
             </select>
+           ))}
+          
+            
             <CirclePlus
               onClick={() => (handleAddBook, setIsAdding(!isadding))}
               className="cursor-pointer text-teal-600 hover:text-teal-800 transition-all size-12"

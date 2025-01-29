@@ -61,11 +61,11 @@ function App() {
           {!token && (
             <>
               <Link
-                // to="/login"
+                to="/login"
                 className="hover:text-indigo-200 transition-colors duration-200"
               ></Link>
               <Link
-                // to="/register"
+                to="/register"
                 className="hover:text-indigo-200 transition-colors duration-200"
               ></Link>
             </>
@@ -74,7 +74,7 @@ function App() {
           {/* Admin and User routes */}
           {role === "admin" && (
             <Link
-              // to={`/admin/${id}`}
+              to={`/admin/${id}`}
               className="hover:text-indigo-200 transition-colors duration-200"
             >
               {/* Admin */}
@@ -83,7 +83,7 @@ function App() {
 
           {role === "user" && id && (
             <Link
-              // to={`/user/${id}`}
+              to={`/user/${id}`}
               className="hover:text-indigo-200 transition-colors duration-200"
             >
               {/* User Dashboard */}
@@ -104,9 +104,9 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home role={role} id={id} />} />
-        <Route  element={<Register />} />
+        <Route path="/register" element={<Register />} />
         <Route
-          // path="/login"
+          path="/login"
           element={
             <Login setRole={setRole} setToken={setToken} setId={setId} />
           }
@@ -114,7 +114,7 @@ function App() {
 
         {/* Admin Protected Route */}
         <Route
-          // path={`/admin/${id}`}
+          path={`/admin/${id}`}
           element={
             role === "admin" && token ? (
               <Admin token={token} role={role} id={id} />
@@ -128,12 +128,12 @@ function App() {
 
         {/* User Protected Route */}
         <Route
-          // path={`/user/${id}`}
+          path={`/user/${id}`}
           element={
             role === "user" && token && id ? (
               <User token={token} role={role} id={id} />
             ) : (
-              <Login setRole={setRole} setToken={setToken} setId={setId} />
+              <Navigate to="/login" />
             )
           }
         />
