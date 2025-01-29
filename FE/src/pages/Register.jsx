@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import axios from "axios";
-import Login from "./Login";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
@@ -85,9 +84,14 @@ export default function Register() {
           >
             Register
           </button>
-          <button className="text-white hover:text-blue-700" onClick={() => navigate("/login")}>Login</button>
+          <button
+            className="text-white hover:text-blue-700"
+            onClick={() => navigate("/login")}
+          >
+            Login
+          </button>
+          {message && <p className="text-red-500">{message}</p>}
         </form>
-        <div>{message && <p className="text-red-500">{message}</p>}</div>
       </section>
     </div>
   );

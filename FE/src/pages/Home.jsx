@@ -14,13 +14,14 @@ export const ResponsiveNavBar = ({ userId, userRole}) => {
       {/* Logo and Mobile Menu Button */}
       <section className="flex justify-between items-center w-full p-4">
         {/* Heading */}
-        <h1 className="text-4xl font-extrabold tracking-wider text-white">
-          📚 Book<span className="text-teal-400">Sphere</span>
+        <h1 className="text-4xl font-bold tracking-wider text-white">
+          <span>Book</span>
+          <span className="text-teal-400">Sphere📚</span>
         </h1>
 
         {/* Mobile Menu Icon */}
         <AlignJustify
-          className="text-white hover:text-teal-400 cursor-pointer transition-all md:hidden"
+          className="text-white pl hover:text-teal-400 cursor-pointer transition-all md:hidden"
           onClick={() => setIsMobile(!isMobile)}
           size={32} // Adjust size for visibility
         />
@@ -149,7 +150,7 @@ const Home = ({role, id }) => {
   // const [ismobile, setIsmobile]=useState(false)
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex flex-col items-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex flex-col items-center justify-center">
       {/* Header Section */}
       {/* <header className="w-full py-6 px-6 border-b border-gray-700"> */}
       <ResponsiveNavBar userId={userId} userRole={userRole} />
@@ -220,7 +221,7 @@ const Home = ({role, id }) => {
       </section>
 
       {/* Call to Action */}
-      <section className="w-full bg-teal-400 py-16 px-6 text-center rounded-tl-[100px]">
+      <section className="w-full place-self-end bg-teal-400 py-16 px-6 text-center rounded-tl-[100px]">
         <h3 className="text-4xl font-bold text-gray-900">
           Join Our Book Lovers' Community
         </h3>

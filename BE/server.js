@@ -280,15 +280,29 @@ app.put("/user/:id", authenticateToken, async (req, res) => {
 });
 
 //  View Books for Rent (/books) for User
-app.get("/user/:id/books", authenticateToken, async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT id, title, author, genre, price, available_copies FROM books WHERE available_copies > 0"
-    );
-    res.status(200).json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
+  const { genre } = req.params;
+  if (genre !== "all") {
+    try {
+      const result = await pool.query(
+        "SELECT id, title, author, genre, price, available_copies FROM books WHERE genre = $1 AND available_copies > 0",
+        [genre]
+      );
+      res.status(200).json(result.rows);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  } else {
+    try {
+      const result = await pool.query(
+        "SELECT id, title, author, genre, price, available_copies FROM books WHERE available_copies > 0"
+      );
+      res.status(200).json(result.rows);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 });
 

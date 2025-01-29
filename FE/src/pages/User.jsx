@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const User = ({ token, role, id }) => {
   const [userData, setUserData] = useState(null);
@@ -52,10 +53,10 @@ const User = ({ token, role, id }) => {
   };
 
   // Fetch available books for rent
-  const fetchAvailableBooks = async () => {
+  const fetchAvailableBooks = async (genre) => {
     try {
       const response = await axios.get(
-        `https://book-sphere-1.onrender.com/user/${id}/books`,
+        `https://book-sphere-1.onrender.com/user/${id}/books/${genre}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -84,7 +85,7 @@ const User = ({ token, role, id }) => {
         }
       );
       alert("Book borrowed successfully!");
-      fetchAvailableBooks();
+      fetchAvailableBooks("all");
       fetchUserHistory();
     } catch (err) {
       setError(err.message);
@@ -101,7 +102,7 @@ const User = ({ token, role, id }) => {
         try {
           await fetchUserData(); // First fetch the user data
           await fetchUserHistory(); // Then fetch the rental history
-          await fetchAvailableBooks(); // Finally fetch available books
+          await fetchAvailableBooks("all"); // Finally fetch available books
         } catch (err) {
           setError(err.message);
         } finally {
@@ -111,6 +112,11 @@ const User = ({ token, role, id }) => {
       fetchData();
     }
   }, [token, id]);
+
+
+
+
+
 
   // Handle loading state
   if (loading) {
@@ -130,9 +136,13 @@ const User = ({ token, role, id }) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <section>
-        <h1>Welcome {userData.name}!</h1>
-        <button onClick={() => navigate("/")}>logout</button>
+      <section className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold mb-4">
+          Welcome <span className="text-teal-500">{userData.name}!</span>
+        </h1>
+        <Button variant="destructive" onClick={() => navigate("/")}>
+          logout
+        </Button>
       </section>
       {/* Tab Navigation */}
       <div className="flex border-b-2 border-gray-300 mb-6">
@@ -217,7 +227,28 @@ const User = ({ token, role, id }) => {
 
       {activeTab === "rent" && (
         <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
-          <h2 className="text-2xl font-bold mb-4">Borrow a Book</h2>
+          <section className="mb-6 flex justify-between gap-4">
+            <h2 className="text-2xl block font-bold mb-4">Borrow a Book</h2>
+            {/* filter based on categories */}
+            {/* "Poetry" "Novel" "Drama" "Autobiography" "Epic" "Novel" "Fiction"
+            "Historical" "Fantasy" "Fantasy" "Historical Fiction" "Historical
+            Fiction" "Historical Fiction" "Novel" "Science Fiction" "Science
+            Fiction" "Science Fiction" "Thriller" "Thriller" */}
+            <select value="all" onChange={(e)=>fetchAvailableBooks(e.target.value)}>
+              <option value="all">All</option>
+              <option value="Poetry">Poetry</option>
+              <option value="Novel">Novel</option>
+              <option value="Drama">Drama</option>
+              <option value="Autobiography">Autobiography</option>
+              <option value="Epic">Epic</option>
+              <option value="Historical">Historical</option>
+              <option value="Fantasy">Fantasy</option>
+              <option value="Historical Fiction">Historical Fiction</option>
+              <option value="Science Fiction">Science Fiction</option>
+              <option value="Thriller">Thriller</option>
+
+            </select>
+          </section>
           {availableBooks.length > 0 ? (
             <ul className="space-y-4">
               {availableBooks.map((book) => (
