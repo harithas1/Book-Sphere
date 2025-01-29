@@ -289,13 +289,16 @@ app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
   );
   const allGenres = getGenres.rows.map((row) => row.genre);
   console.log(allGenres);
+
+  // search by genre
   if (genre !== "all") {
     try {
       const result = await pool.query(
-        "SELECT id, title, author, genre, price, available_copies FROM books WHERE genre = $1 AND available_copies > 0",
+        "SELECT id, title, author, genre, price, copies, available_copies FROM books WHERE genre = $1 AND available_copies > 0",
         [genre]
       );
-      res.status(200).json({ books: result.rows, genres: allGenres});
+
+      res.status(200).json({ books: result.rows, genres: allGenres });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Internal server error" });
@@ -303,9 +306,10 @@ app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
   } else {
     try {
       const result = await pool.query(
-        "SELECT id, title, author, genre, price, available_copies FROM books WHERE available_copies > 0"
+        "SELECT id, title, author, genre, price, copies, available_copies FROM books"
       );
-        res.status(200).json({ books: result.rows, genres: allGenres });
+
+      res.status(200).json({ books: result.rows, genres: allGenres });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Internal server error" });
@@ -313,6 +317,7 @@ app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
   }
 });
 
+// View User's Rental History
 app.get("/user/:id/rentals", authenticateToken, async (req, res) => {
   // Validate customer ID from the authenticated token
   if (req.user.id !== parseInt(req.params.id)) {
