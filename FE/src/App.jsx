@@ -16,6 +16,7 @@ function App() {
   const [token, setToken] = useState(""); // Token state for authentication
   const [role, setRole] = useState(""); // Role state (user/admin)
   const [id, setId] = useState(""); // User ID for personalized access
+  const [activeTab, setActiveTab] = useState("details");
 
   const logout = () => {
     // Clear authentication state on logout
@@ -52,7 +53,7 @@ function App() {
         {/* Navigation Links */}
         <div className="flex items-center space-x-6 text-white text-lg">
           <Link
-            // to="/"
+            to="/"
             className="hover:text-indigo-200 transition-colors duration-200"
           ></Link>
 
@@ -102,8 +103,8 @@ function App() {
 
       <Routes>
         {/* Public Routes */}
-        <Route element={<Home role={role} id={id} />} />
-        <Route element={<Register />} />
+        <Route path="/" element={<Home role={role} id={id} />} />
+        <Route  element={<Register />} />
         <Route
           // path="/login"
           element={
