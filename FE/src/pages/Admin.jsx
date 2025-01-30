@@ -234,6 +234,7 @@ export default function Admin({ token, role, id }) {
     try {
       await axios.post(
         `https://book-sphere-1.onrender.com/${role}/${id}/rentbook/${rentOutBook.id}/${rentOutBook.userId}`,
+        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert("Book rented successfully!");
