@@ -337,7 +337,7 @@ export default function Admin({ token, role, id }) {
             <h2 className="text-2xl font-semibold mb-4">Customers Details</h2>
             <input
               // value={selectedUserName}
-              className="border border-gray-300 px-2 rounded-md"
+              className="border border-gray-300 p-2 rounded-md"
               onChange={(e) => setSelectedUserName(e.target.value)}
               type="text"
               placeholder="🔍 Search"
