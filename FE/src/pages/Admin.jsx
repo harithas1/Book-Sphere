@@ -209,14 +209,10 @@ export default function Admin({ token, role, id }) {
   };
   // admin/:id/user/:userId
   const handleDeleteUser = async (userId) => {
-  
     try {
-      await axios.delete(
-        `https://book-sphere-1.onrender.com/${userId}/del`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await axios.delete(`https://book-sphere-1.onrender.com/${userId}/del`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       alert("User deleted successfully!");
       fetchUsersData(selectedUserName);
     } catch (err) {
@@ -248,10 +244,9 @@ export default function Admin({ token, role, id }) {
   };
 
   const handleReturnBook = async (returnBook) => {
-   const bid = returnBook.book_id
-   const custId = returnBook.customer_id
-   console.log(bid,custId);
-   
+    const bid = returnBook.book_id;
+    const custId = returnBook.customer_id;
+    console.log(bid, custId);
 
     try {
       await axios.post(
@@ -527,8 +522,8 @@ export default function Admin({ token, role, id }) {
           <h2 className="text-2xl font-semibold mb-4">Rented Books Details</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {rentals.map((rental) => (
-              <Card key={rental.rental_id} className="p-4">
-                <section>
+              <Card key={rental.rental_id} className="p-4 flex flex-col">
+                <section className="flex-grow">
                   <p>
                     <strong>Rental ID: </strong> {rental.rental_id}
                   </p>
@@ -567,9 +562,11 @@ export default function Admin({ token, role, id }) {
                     )}
                   </p>
                 </section>
-                <section>
+
+                {/* Flex container for the button */}
+                <section className="mt-auto">
                   <Button
-                    className="mt-4"
+                    className="mx-auto w-full" // w-full ensures the button takes the full width of its container
                     onClick={() => setReturnBook(rental)}
                   >
                     Return Book
