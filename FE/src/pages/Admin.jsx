@@ -409,7 +409,7 @@ export default function Admin({ token, role, id }) {
                         name: user.name,
                         phone: user.phone,
                         role: user.role,
-                        password: "",
+                        newPassword: "",
                       })
                     }
                   >
@@ -675,9 +675,9 @@ export default function Admin({ token, role, id }) {
             </select>
             <Input
               type="text"
-              value={editUser.password}
+              value={editUser.newPassword}
               onChange={(e) =>
-                setEditUser({ ...editUser, password: e.target.value })
+                setEditUser({ ...editUser, newPassword: e.target.value })
               }
               placeholder="Password"
             />
