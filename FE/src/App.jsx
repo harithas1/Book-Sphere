@@ -17,19 +17,20 @@ function App() {
   const [role, setRole] = useState(""); // Role state (user/admin)
   const [id, setId] = useState(""); // User ID for personalized access
 
-  const logout = () => {
-    // Clear authentication state on logout
-    setToken("");
-    setRole("");
-    setId("");
+  // const logout = () => {
+  //   // Clear authentication state on logout
+  //   setToken("");
+  //   setRole("");
+  //   setId("");
 
-    // Also clear from localStorage
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("id");
-  };
+  //   // Also clear from localStorage
+  //   localStorage.removeItem("token");
+  //   localStorage.removeItem("role");
+  //   localStorage.removeItem("id");
+  // };
 
   // Load from localStorage on initial load
+  
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedRole = localStorage.getItem("role");
@@ -40,7 +41,7 @@ function App() {
       setRole(storedRole);
       setId(storedId);
     }
-  }, []);
+  }, [ token, role, id]);
 
   return (
     <Router>
@@ -90,30 +91,30 @@ function App() {
           )}
 
           {/* Logout button */}
-          {role && token && <button onClick={logout}>{/* Logout */}</button>}
+          {/* {role && token && <button onClick={logout}>Logout</button>} */}
         </div>
       </div>
 
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<Home role={role} id={id} />} />
+        <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route
           path="/login"
           element={
-            <Login setRole={setRole} setToken={setToken} setId={setId} />
+            <Login setRole={role ? role: setRole} setToken={token ? token : setToken} setId={id ? id : setId} />
           }
         />
 
         {/* Admin Protected Route */}
         <Route
-          path="/admin/:id"
+          path={`/admin/${id}`}
           element={
             role === "admin" && token ? (
               <Admin token={token} role={role} id={id} />
             ) : (
               <div className="text-red-500 text-center mt-20">
-                Access Denied. Please log in as an admin.
+                Access Denied. Please log in again.
               </div>
             )
           }
@@ -121,7 +122,7 @@ function App() {
 
         {/* User Protected Route */}
         <Route
-          path="/user/:id"
+          path={`/user/${id}`}
           element={
             role === "user" && token && id ? (
               <User token={token} role={role} id={id} />
@@ -133,6 +134,7 @@ function App() {
 
         {/* Fallback for Undefined Routes */}
         <Route path="*" element={<Navigate to="/" />} />
+
       </Routes>
     </Router>
   );

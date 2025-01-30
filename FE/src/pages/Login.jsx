@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -8,6 +8,8 @@ export default function Login({ setRole, setToken, setId }) {
     password: "",
     role: "user",
   });
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -19,6 +21,7 @@ export default function Login({ setRole, setToken, setId }) {
       setError("All fields are required!");
       return;
     }
+    setIsLoggingIn(true);
 
     try {
       console.log("trying..");
@@ -35,6 +38,8 @@ export default function Login({ setRole, setToken, setId }) {
 
       console.log("Login successful:", response.data);
       setError("");
+      setIsLoggingIn(false);
+
       setToken(response.data.token);
       setRole(response.data.user.role);
       setId(response.data.user.id);
@@ -56,6 +61,18 @@ export default function Login({ setRole, setToken, setId }) {
       );
     }
   };
+
+  // if there are details in the local storage again redirect to that page
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      if (localStorage.getItem("role") === "admin") {
+        navigate(`/admin/${localStorage.getItem("id")}`);
+      } else {
+        navigate(`/user/${localStorage.getItem("id")}`);
+      }
+    }
+  }, []);
 
   return (
     <div className="bg-[url('../src/assets/bookloginbg.avif')] bg-cover h-screen">
@@ -92,7 +109,7 @@ export default function Login({ setRole, setToken, setId }) {
             type="submit"
             className="bg-red-500 text-white p-3 font-bold rounded-lg"
           >
-            Login
+            {isLoggingIn ? "Logging in..." : "Login"}
           </button>
           <a className="text-white" onClick={() => navigate("/register")}>
             Register

@@ -10,10 +10,37 @@ export default function Register() {
     role: "user",
   });
   const [message, setMessage] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); // To manage submit state
   const navigate = useNavigate();
+
+  // Password validation regex
+  const passwordPattern =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+
+  // Password validation function
+  const validatePassword = () => {
+    const { password } = form;
+
+    if (!passwordPattern.test(password)) {
+      return "Password must contain at least one lowercase letter, one uppercase letter, one digit, one special character, and be at least 6 characters long.";
+    }
+
+    return ""; // No error
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Perform password validation
+    const passwordValidationError = validatePassword();
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError); // Set error message
+      return; // Stop form submission if password validation fails
+    }
+
+    setPasswordError(""); // Clear any previous password errors
+    setIsSubmitting(true); // Disable the submit button
 
     try {
       const response = await axios.post(
@@ -22,8 +49,11 @@ export default function Register() {
       );
       console.log("Registration successful:", response.data);
       setMessage("Registration successful!");
+      setIsSubmitting(false); // Re-enable the submit button
+      navigate("/login"); // Redirect to login after successful registration
     } catch (error) {
       setMessage(error.response?.data?.error || "Something went wrong!");
+      setIsSubmitting(false); // Re-enable the submit button in case of an error
     }
   };
 
@@ -35,9 +65,9 @@ export default function Register() {
           onSubmit={handleSubmit}
         >
           <input
-            className="p-2 "
+            className="p-2"
             type="text"
-            placeholder="name"
+            placeholder="Name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             required
@@ -58,14 +88,7 @@ export default function Register() {
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             required
           />
-          {/* <input
-          className="p-2"
-          type="text"
-          placeholder="Role"
-          value={form.role}
-          onChange={(e) => setForm({ ...form, role: e.target.value })}
-          required
-        /> */}
+
           <select
             className="p-2 w-full"
             value={form.role}
@@ -74,22 +97,29 @@ export default function Register() {
             <option value="" disabled>
               Select Role
             </option>
-            <option value="user">user</option>
-            <option value="admin">admin</option>
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
           </select>
 
           <button
             className="bg-red-600 p-3 text-white rounded-lg"
             type="submit"
+            disabled={isSubmitting} // Disable the button while submitting
           >
-            Register
+            {isSubmitting ? "Registering..." : "Register"}
           </button>
+
           <button
             className="text-white hover:text-blue-700"
             onClick={() => navigate("/login")}
           >
             Login
           </button>
+
+          {/* Display password error if any */}
+          {passwordError && <p className="text-red-500">{passwordError}</p>}
+
+          {/* Display general message */}
           {message && <p className="text-red-500">{message}</p>}
         </form>
       </section>

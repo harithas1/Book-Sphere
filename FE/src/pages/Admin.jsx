@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CirclePlus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Admin({ token, role, id }) {
   const [admin, setAdmin] = useState([]);
@@ -18,12 +18,13 @@ export default function Admin({ token, role, id }) {
   const [books, setBooks] = useState([]);
   const [rentals, setRentals] = useState([]);
   const [activeTab, setActiveTab] = useState("adminDetails");
-  const [genres, setGenres] = useState(["all"]);
-  
+  const [genres, setGenres] = useState(["all genres"]);
 
   // State for modal/dialog
   const [editBook, setEditBook] = useState(null);
   const [editUser, setEditUser] = useState(null);
+  const [rentOutBook, setRentOutBook] = useState(null);
+  const [returnBook, setReturnBook] = useState(null);
 
   const [addBook, setAddBook] = useState({
     title: "",
@@ -36,6 +37,17 @@ export default function Admin({ token, role, id }) {
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [selectedUserName, setSelectedUserName] = useState("all");
 
+  const navigate = useNavigate();
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    const storedRole = localStorage.getItem("role");
+    const storedId = localStorage.getItem("id");
+
+    if (storedToken) {
+      navigate(`/${storedRole}/${storedId}`);
+    }
+  }, [navigate]);
+
   // Fetch admin data
   const fetchAdmin = async () => {
     try {
@@ -45,6 +57,8 @@ export default function Admin({ token, role, id }) {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      console.log(response.data);
+
       setAdmin(response.data);
     } catch (err) {
       console.error(err);
@@ -57,7 +71,9 @@ export default function Admin({ token, role, id }) {
 
     try {
       const response = await axios.get(
-        `https://book-sphere-1.onrender.com/${role}/${id}/users/${selectedUserName}`,
+        `https://book-sphere-1.onrender.com/${role}/${id}/users/${
+          selectedUserName ? selectedUserName : "all"
+        }`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setUsers(response.data);
@@ -70,7 +86,8 @@ export default function Admin({ token, role, id }) {
     fetchUsersData(selectedUserName);
   }, [selectedUserName]);
 
-  const handleUserDetails = async () => {
+  const handleEditUser = async () => {
+    console.log(editUser);
     try {
       await axios.put(
         `https://book-sphere-1.onrender.com/${role}/${id}/user/edit/${editUser.id}`,
@@ -93,7 +110,7 @@ export default function Admin({ token, role, id }) {
       );
       console.log(response.data.books);
       setBooks(response.data.books);
-      setGenres(["all", ...response.data.genres]);
+      setGenres(["all genres", ...response.data.genres]);
     } catch (err) {
       console.error(err);
     }
@@ -150,6 +167,8 @@ export default function Admin({ token, role, id }) {
         `https://book-sphere-1.onrender.com/${role}/${id}/rentals/details`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      console.log(response.data);
+
       setRentals(response.data);
     } catch (err) {
       console.error(err);
@@ -186,6 +205,69 @@ export default function Admin({ token, role, id }) {
       alert("Failed to add book.");
     }
   };
+  // admin/:id/user/:userId
+  const handleDeleteUser = async (userId) => {
+    try {
+      await axios.delete(
+        `https://book-sphere-1.onrender.com/${role}/${id}/user/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      alert("User deleted successfully!");
+      fetchUsersData(selectedUserName);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete user.");
+    }
+  };
+
+  // rent book
+  //  "/admin/:id/rentbook/:bookId/:userId",
+
+  const handleRentOutBook = async (rentOutBook) => {
+    console.log(rentOutBook);
+
+    try {
+      await axios.post(
+        `https://book-sphere-1.onrender.com/${role}/${id}/rentbook/${rentOutBook.id}/${rentOutBook.userId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Book rented successfully!");
+      setRentOutBook(null);
+      fetchBooks(selectedGenre);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to rent book.");
+    }
+  };
+
+  //   "/admin/:id/returnbook/:bookId/:userId",
+  // book_id: 2;
+  // book_title: "Vishwambara";
+  // customer_id: 2;
+  // customer_name: "Haritha";
+  // rent_date: "2025-01-28T16:29:56.080Z";
+  // rental_id: 1;
+  // return_date: null;
+  // returned: false;
+  const handleReturnBook = async (returnBook) => {
+    console.log(returnBook);
+    
+    try {
+      await axios.post(
+        `https://book-sphere-1.onrender.com/${role}/${id}/returnbook/${returnBook.book_id}/${returnBook.customer_id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Book returned successfully!");
+      setReturnBook(null)
+      fetchBooks(selectedGenre);
+      fetchRentals()
+    } catch (err) {
+      console.error(err);
+      alert("Failed to return book.");
+    }
+  };
 
   useEffect(() => {
     fetchAdmin();
@@ -193,24 +275,40 @@ export default function Admin({ token, role, id }) {
     fetchBooks(selectedGenre);
     fetchRentals();
   }, []);
+  const logout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-8xl mx-auto p-6">
+      <section className="flex justify-between place-items-center mb-6 flex-col md:flex-row lg:flex-row ">
+        <h1 className="text-3xl font-bold text-center">
+          Hello <span className="text-teal-600">{admin?.name}!</span>
+        </h1>
+        <section className="flex gap-4 xs: flex-col sm:flex-row md:flex-row lg:flex-row xs: mt-4">
+          <Button onClick={() => navigate("/")}>Go to Home</Button>
+          <Button variant="destructive" onClick={logout}>
+            Logout
+          </Button>
+        </section>
+      </section>
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-4 lg:block justify-center sm:block md:block max-sm: hidden">
-          <TabsTrigger value="adminDetails">Admin Details</TabsTrigger>
+        <TabsList className="mb-6 lg:block justify-center sm:block md:block max-sm: hidden">
+          <TabsTrigger value="adminDetails">Profile</TabsTrigger>
           <TabsTrigger value="usersDetails">Customers Details</TabsTrigger>
           <TabsTrigger value="books">All Books</TabsTrigger>
           <TabsTrigger value="rent">Rented Books Details</TabsTrigger>
         </TabsList>
         {/* Responsive tabs */}
         <select
-          className="lg:hidden sm:hidden md:hidden max-sm: block px-4 py-2 w-full"
+          className="lg:hidden sm:hidden md:hidden max-sm: block px-4 py-2 w-full rounded-md"
           name="tabs"
           id="tabs"
           value={activeTab}
           onChange={(e) => setActiveTab(e.target.value)}
         >
+          <option> select a tab</option>
           <option value="adminDetails">Admin Details</option>
           <option value="usersDetails">Customers Details</option>
           <option value="books">All Books</option>
@@ -218,7 +316,7 @@ export default function Admin({ token, role, id }) {
         </select>
 
         <TabsContent value="adminDetails">
-          <h2 className="text-2xl font-semibold mb-4">Admin Details</h2>
+          <h2 className="text-2xl font-semibold mb-4">Profile</h2>
           <Card className="p-4">
             <p>
               <strong>ID:</strong> {admin.id}
@@ -240,7 +338,7 @@ export default function Admin({ token, role, id }) {
         </TabsContent>
 
         <TabsContent value="usersDetails">
-          <section className="mb-4 flex justify-between ">
+          <section className="mb-4 flex flex-col sm:flex-row md:flex-row lg:flex-row justify-between ">
             <h2 className="text-2xl font-semibold mb-4">Customers Details</h2>
             <input
               // value={selectedUserName}
@@ -251,9 +349,9 @@ export default function Admin({ token, role, id }) {
             />
           </section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4  md:grid-cols-3 lg:grid-cols-4">
             {users.map((user) => (
-              <Card key={user.id} className="p-4 flex ">
+              <Card key={user.id} className="p-4">
                 <section>
                   <p>
                     <strong>ID:</strong> {user.id}
@@ -272,49 +370,61 @@ export default function Admin({ token, role, id }) {
                     {new Date(user.created_at).toLocaleDateString()}
                   </p>
                 </section>
-                <Button
-                  className="ml-auto bg-green-600"
-                  onClick={() =>
-                    setEditUser({
-                      ...user,
-                      id: user.id,
-                      name: user.name,
-                      phone: user.phone,
-                      role: user.role,
-                      newPassword: "",
-                    })
-                  }
-                >
-                  Edit
-                </Button>
+                <section className="flex flex-row justify-between mt-4">
+                  <Button
+                    className=" xs:w-full bg-green-600"
+                    onClick={() =>
+                      setEditUser({
+                        ...user,
+                        id: user.id,
+                        name: user.name,
+                        phone: user.phone,
+                        role: user.role,
+                        newPassword: "",
+                      })
+                    }
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    className="bg-red-600 xs:w-full"
+                    onClick={() => handleDeleteUser(user.id)}
+                  >
+                    Delete
+                  </Button>
+                </section>
               </Card>
             ))}
           </div>
         </TabsContent>
 
         <TabsContent value="books">
-          <section className="flex justify-between items-center mb-4">
+          <section className="flex xs:flex-col sm: flex-row md:flex-row lg:flex-row sm: justify-between lg:justify-between md:justify-between items-center mb-4 gap-3 ">
             <h2 className="text-2xl font-semibold mb-4">All Books</h2>
 
-            <select
-              name="genres"
-              onChange={(e) => setSelectedGenre(e.target.value)}
-              className="px-4 py-2"
-              id=""
-            >
-              {genres.map((genre) => (
-                <option key={genre} value={genre}>
-                  {genre}
-                </option>
-              ))}
-            </select>
-            <CirclePlus
-              onClick={() => (handleAddBook, setIsAdding(!isadding))}
-              className="cursor-pointer text-teal-600 hover:text-teal-800 transition-all size-12"
-            />
+            <section className="flex xs:flex-col sm:flex-row md:flex-row lg:flex-row gap-2">
+              <select
+                name="genres"
+                onChange={(e) => setSelectedGenre(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-600 focus:border-teal-600"
+                id=""
+              >
+                {genres.map((genre) => (
+                  <option key={genre} value={genre}>
+                    {genre}
+                  </option>
+                ))}
+              </select>
+              <Button
+                onClick={() => setIsAdding(!isadding)}
+                className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md"
+              >
+                Add Book
+              </Button>
+            </section>
           </section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4  md:grid-cols-3 lg:grid-cols-4">
             {books.map((book) => (
               <Card key={book.id} className="p-4">
                 <section className="mb-4">
@@ -340,15 +450,28 @@ export default function Admin({ token, role, id }) {
                     <strong>Available Copies:</strong> {book.available_copies}
                   </p>
                 </section>
-                <section className="flex gap-2 justify-between">
+                <section className="flex gap-2 flex-col sm:flex-row justify-evenly">
+                  {/* rent out */}
+                  <Button
+                    className="bg-green-500 text-white "
+                    variant="outline"
+                    onClick={() => setRentOutBook({ ...book, userId: "" })}
+                  >
+                    Rent Out
+                  </Button>
+
+                  <Button
+                    className="bg-blue-500 text-white"
+                    variant="outline"
+                    onClick={() => setEditBook(book)}
+                  >
+                    Edit
+                  </Button>
                   <Button
                     variant="destructive"
                     onClick={() => handleDeleteBook(book.id)}
                   >
                     Delete
-                  </Button>
-                  <Button variant="outline" onClick={() => setEditBook(book)}>
-                    Edit
                   </Button>
                 </section>
               </Card>
@@ -358,46 +481,55 @@ export default function Admin({ token, role, id }) {
 
         <TabsContent value="rent">
           <h2 className="text-2xl font-semibold mb-4">Rented Books Details</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4  md:grid-cols-3 lg:grid-cols-4">
             {rentals.map((rental) => (
               <Card key={rental.rental_id} className="p-4">
-                <p>
-                  <strong>Rental ID:</strong> {rental.rental_id}
-                </p>
-                <p>
-                  <strong>Book ID:</strong> {rental.book_id}
-                </p>
-                <p>
-                  <strong>Book Title:</strong> {rental.book_title}
-                </p>
-                <p>
-                  <strong>User ID:</strong> {rental.user_id}
-                </p>
-                <p>
-                  <strong>Customer Name:</strong> {rental.customer_name}
-                </p>
-                <p>
-                  <strong>Customer Phone:</strong> {rental.customer_phone}
-                </p>
-                <p>
-                  <strong>Rent Date:</strong>{" "}
-                  {rental.rent_date &&
-                    new Date(rental.rent_date).toLocaleDateString()}
-                </p>
-                <p>
-                  <strong>Return Date:</strong>{" "}
-                  {rental.return_date
-                    ? new Date(rental.return_date).toLocaleDateString()
-                    : "Not yet returned"}
-                </p>
-                <p>
-                  <strong>Returned:</strong>{" "}
-                  {rental.returned ? (
-                    <span className="text-green-600 font-bold">Yes</span>
-                  ) : (
-                    <span className="text-red-600 font-bold">No</span>
-                  )}
-                </p>
+                <section className="mb-4">
+                  <p>
+                    <strong>Rental ID:</strong> {rental.rental_id}
+                  </p>
+                  <p>
+                    <strong>Book ID:</strong> {rental.book_id}
+                  </p>
+                  <p>
+                    <strong>Book Title:</strong> {rental.book_title}
+                  </p>
+                  <p>
+                    <strong>User ID:</strong> {rental.customer_id}
+                  </p>
+                  <p>
+                    <strong>Customer Name:</strong> {rental.customer_name}
+                  </p>
+                  <p>
+                    <strong>Customer Phone:</strong> {rental.customer_phone}
+                  </p>
+                  <p>
+                    <strong>Rent Date:</strong>{" "}
+                    {rental.rent_date &&
+                      new Date(rental.rent_date).toLocaleDateString()}
+                  </p>
+                  <p>
+                    <strong>Return Date:</strong>
+                    {rental.return_date
+                      ? new Date(rental.return_date).toLocaleDateString()
+                      : "Not yet returned"}
+                  </p>
+                  <p>
+                    <strong>Returned:</strong>{" "}
+                    {rental.returned ? (
+                      <span className="text-green-600 font-bold">Yes</span>
+                    ) : (
+                      <span className="text-red-600 font-bold">No</span>
+                    )}
+                  </p>
+                </section>
+                <section>
+                  <Button
+                    onClick={() => setReturnBook(rental)}
+                  >
+                    Return Book
+                  </Button>
+                </section>
               </Card>
             ))}
           </div>
@@ -465,15 +597,15 @@ export default function Admin({ token, role, id }) {
         </Dialog>
       )}
 
-      {/* Edit User Dialog */}
+      {/* edit user */}
       {editUser && (
         <Dialog open={Boolean(editUser)} onOpenChange={() => setEditUser(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Reset User Details</DialogTitle>
+              <DialogTitle>Edit User</DialogTitle>
             </DialogHeader>
-            <Input value={editUser.id} readOnly />
             <Input
+              type="text"
               value={editUser.name}
               onChange={(e) =>
                 setEditUser({ ...editUser, name: e.target.value })
@@ -481,32 +613,127 @@ export default function Admin({ token, role, id }) {
               placeholder="Name"
             />
             <Input
+              type="text"
               value={editUser.phone}
               onChange={(e) =>
                 setEditUser({ ...editUser, phone: e.target.value })
               }
               placeholder="Phone"
             />
-            {/* edit role */}
             <select
-              className="w-full p-2 border border-gray-300 rounded-md"
-              defaultValue={editUser.role}
+              className="p-2 rounded"
+              value={editUser.role}
               onChange={(e) =>
                 setEditUser({ ...editUser, role: e.target.value })
               }
+              name="role"
+              id=""
             >
               <option value="user">User</option>
               <option value="admin">Admin</option>
             </select>
             <Input
+              type="text"
               value={editUser.newPassword}
               onChange={(e) =>
-                setEditUser({ ...editUser, newPassword: e.target.value })
+                setEditUser({ ...editUser, password: e.target.value })
               }
-              placeholder="New Password"
-              type="password"
+              placeholder="Password"
             />
-            <Button onClick={handleUserDetails}>Reset</Button>
+
+            <Button onClick={handleEditUser}>Update</Button>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* rent out Dialog */}
+      {rentOutBook && (
+        <Dialog
+          open={Boolean(rentOutBook)}
+          onOpenChange={() => setRentOutBook(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Rent out</DialogTitle>
+            </DialogHeader>
+            <Input
+              type="number"
+              min="1"
+              value={rentOutBook.id}
+              onChange={(e) =>
+                setRentOutBook({
+                  ...rentOutBook,
+                  id: e.target.value,
+                })
+              }
+              placeholder="User ID"
+            />
+            <Input
+              value={rentOutBook.title}
+              onChange={(e) =>
+                setRentOutBook({
+                  ...rentOutBook,
+                  title: e.target.value,
+                })
+              }
+              placeholder="Title"
+            />
+            {/* take customer ID */}
+            <Input
+              type="number"
+              min="1"
+              value={rentOutBook.userId}
+              onChange={(e) =>
+                setRentOutBook({
+                  ...rentOutBook,
+                  userId: e.target.value,
+                })
+              }
+              placeholder="Enter Customer ID"
+            />
+            <Button onClick={() => handleRentOutBook(rentOutBook)}>
+              Rent Out
+            </Button>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* return books */}
+
+      {returnBook && (
+        <Dialog
+          open={Boolean(returnBook)}
+          onOpenChange={() => setReturnBook(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Return Book</DialogTitle>
+            </DialogHeader>
+            <Input
+              type="text"
+              value={returnBook.book_title}
+              placeholder="Title"
+            />
+            <Input
+              type="number"
+              value={returnBook.book_id}
+              placeholder="Book ID"
+            />
+            <Input
+              type="text"
+              value={returnBook.customer_name}
+              placeholder="Customer ID"
+            />
+
+            <Input
+              type="number"
+              value={returnBook.customer_id}
+              placeholder="Customer ID"
+            />
+
+            <Button onClick={() => handleReturnBook(returnBook)}>
+              Return Book
+            </Button>
           </DialogContent>
         </Dialog>
       )}
@@ -544,7 +771,7 @@ export default function Admin({ token, role, id }) {
             <Input
               value={addBook.price}
               onChange={(e) =>
-                setAddBook({ ...addBook, price: parseInt(e.target.value) })
+                setAddBook({ ...addBook, price: e.target.value })
               }
               placeholder="Price"
             />

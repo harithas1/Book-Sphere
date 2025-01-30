@@ -288,7 +288,7 @@ app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
     "SELECT DISTINCT genre FROM books WHERE available_copies > 0"
   );
   const allGenres = getGenres.rows.map((row) => row.genre);
-  console.log(allGenres);
+  // console.log(allGenres);
 
   // search by genre
   if (genre !== "all") {
@@ -313,6 +313,30 @@ app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Internal server error" });
+    }
+  }
+});
+
+// ---------------------- Admin Routes ----------------------
+
+app.get("/admin/:id", authenticateToken, authorizeAdmin, async (req, res) => {
+  const { id } = req.params;
+
+  // Validate the id (ensure it's a valid number)
+  if (isNaN(id)) {
+    return res.status(400).json({ error: "Invalid user ID format" });
+  } else {
+    try {
+      const result = await pool.query(`SELECT * FROM customers WHERE id = $1`, [
+        id,
+      ]);
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      console.log(result.rows[0]);
+      res.status(200).json(result.rows[0]);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
   }
 });
@@ -354,182 +378,60 @@ app.get("/user/:id/rentals", authenticateToken, async (req, res) => {
   }
 });
 
-// Delete User
-app.delete("/user/:id", authenticateToken, async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const result = await pool.query("DELETE FROM customers WHERE id = $1", [
-      id,
-    ]);
-
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.status(200).json({ message: "User deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post("/user/:id/rentbook", authenticateToken, async (req, res) => {
-  const { bookId } = req.body;
-
-  try {
-    // Begin the transaction
-    await pool.query("BEGIN");
-
-    // Check if book exists and lock the row for update
-    const bookResult = await pool.query(
-      "SELECT * FROM books WHERE id = $1 FOR UPDATE",
-      [bookId]
-    );
-
-    if (bookResult.rows.length === 0) {
-      await pool.query("ROLLBACK");
-      return res.status(404).json({ error: "Book not found" });
-    }
-
-    const book = bookResult.rows[0];
-
-    if (book.available_copies <= 0) {
-      await pool.query("ROLLBACK");
-      return res.status(400).json({ error: "No copies available for rent" });
-    }
-
-    // Check if user already rented the book before
-    const existingRental = await pool.query(
-      "SELECT * FROM rentals WHERE customer_id = $1 AND book_id = $2",
-      [req.user.id, bookId]
-    );
-
-    if (existingRental.rows.length > 0) {
-      await pool.query("ROLLBACK");
-      return res
-        .status(409)
-        .json({ error: "Book already rented by the user." });
-    }
-
-    // Insert rental record
-    const rentalResult = await pool.query(
-      "INSERT INTO rentals (customer_id, book_id) VALUES ($1, $2) RETURNING *",
-      [req.user.id, bookId]
-    );
-
-    // Update book record (decrease available copies, increase rented copies)
-    await pool.query(
-      "UPDATE books SET rented_copies = rented_copies + 1 WHERE id = $1",
-      [bookId]
-    );
-
-    // Commit the transaction
-    await pool.query("COMMIT");
-
-    res.status(201).json({
-      message: "Book rented successfully",
-      rental: rentalResult.rows[0],
-    });
-  } catch (err) {
-    // Rollback transaction in case of error
-    await pool.query("ROLLBACK");
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// Return Book
-app.post("/user/:id/returnbook", authenticateToken, async (req, res) => {
-  const { id } = req.params;
-  const { bookId } = req.body;
-
-  try {
-    // Check if book exists and lock the row for update
-    const bookResult = await pool.query(
-      "SELECT * FROM books WHERE id = $1 FOR UPDATE",
-      [bookId]
-    );
-
-    if (bookResult.rows.length === 0) {
-      return res.status(404).json({ error: "Book not found" });
-    }
-
-    const book = bookResult.rows[0];
-    if (book.available_copies <= 0) {
-      return res.status(400).json({ error: "No copies available for rent" });
-    }
-
-    // Begin the transaction
-    await pool.query("BEGIN");
-
-    // Insert rental record
-    const rentalResult = await pool.query(
-      "INSERT INTO rentals (customer_id, book_id) VALUES ($1, $2) RETURNING *",
-      [id, bookId]
-    );
-
-    // Commit the transaction
-    await pool.query("COMMIT");
-    res.status(201).json(rentalResult.rows[0]);
-  } catch (err) {
-    await pool.query("ROLLBACK");
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// ---------------------- Admin Routes ----------------------
-
-app.get("/admin/:id", authenticateToken, authorizeAdmin, async (req, res) => {
-  const { id } = req.params;
-
-  // Validate the id (ensure it's a valid number)
-  if (isNaN(id)) {
-    return res.status(400).json({ error: "Invalid user ID format" });
-  } else {
-    try {
-      const result = await pool.query(`SELECT * FROM customers WHERE id = $1`, [
-        id,
-      ]);
-      if (result.rows.length === 0) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      console.log(result.rows[0]);
-      res.status(200).json(result.rows[0]);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  }
-});
-
 // Endpoint to get all users
-// search by name
+// search by name along with their data show their rental history
 app.get(
   "/admin/:id/users/:search",
   authenticateToken,
   authorizeAdmin,
   async (req, res) => {
     const { search } = req.params;
-    if (search !== "all") {
-      try {
-        const result = await pool.query(
+
+    try {
+      let result;
+      if (search !== "all") {
+        result = await pool.query(
           "SELECT * FROM customers WHERE name ILIKE '%' || $1 || '%'",
           [search]
         );
-        res.status(200).json(result.rows);
-      } catch (err) {
-        res.status(500).json({ error: err.message });
+      } else {
+        result = await pool.query("SELECT * FROM customers");
       }
-    } else {
-      try {
-        const result = await pool.query("SELECT * FROM customers");
-        res.status(200).json(result.rows);
-      } catch (err) {
-        res.status(500).json({ error: err.message });
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "No users found" });
       }
+
+      const usersWithRentalHistory = [];
+
+      // Fetch rental history sequentially for each customer
+      for (let user of result.rows) {
+        const rentalHistory = await pool.query(
+          `
+          SELECT
+            rentals.id AS rental_id,
+            books.title AS book_title,
+            rentals.rent_date
+          FROM rentals
+          JOIN books ON rentals.book_id = books.id
+          WHERE rentals.customer_id = $1
+          `,
+          [user.id]
+        );
+
+        usersWithRentalHistory.push({
+          user,
+          rentalHistory: rentalHistory.rows,
+        });
+      }
+
+      res.status(200).json(usersWithRentalHistory);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
   }
 );
+
 
 // Reset User details (Admin)
 app.put(
@@ -567,7 +469,7 @@ app.get(
       "SELECT DISTINCT genre FROM books WHERE available_copies > 0"
     );
     const allGenres = getGenres.rows.map((row) => row.genre);
-    console.log(allGenres);
+    // console.log(allGenres);
 
     // search by genre
     if (genre !== "all") {
@@ -662,6 +564,7 @@ app.get(
         rentals.id AS rental_id,
         customers.id AS customer_id,
         customers.name AS customer_name,
+        customers.phone AS customer_phone,
         books.id AS book_id,
         books.title AS book_title,
         rentals.rent_date,
@@ -711,6 +614,153 @@ app.post(
           error: error.message,
         });
       }
+    }
+  }
+);
+
+// admin will rent out book
+app.post(
+  "/admin/:id/rentbook/:bookId/:userId",
+  authenticateToken,
+  authorizeAdmin,
+  async (req, res) => {
+    const { bookId, userId } = req.params;
+
+    try {
+      // Begin the transaction
+      await pool.query("BEGIN");
+
+      // Check if book exists and lock the row for update
+      const bookResult = await pool.query(
+        "SELECT * FROM books WHERE id = $1 FOR UPDATE",
+        [bookId]
+      );
+
+      if (bookResult.rows.length === 0) {
+        await pool.query("ROLLBACK");
+        return res.status(404).json({ error: "Book not found" });
+      }
+
+      const book = bookResult.rows[0];
+
+      if (book.available_copies <= 0) {
+        await pool.query("ROLLBACK");
+        return res.status(400).json({ error: "No copies available for rent" });
+      }
+
+      // Check if user already rented the book before
+      const existingRental = await pool.query(
+        "SELECT * FROM rentals WHERE customer_id = $1 AND book_id = $2",
+        [userId, bookId]
+      );
+
+      if (existingRental.rows.length > 0) {
+        await pool.query("ROLLBACK");
+        return res
+          .status(409)
+          .json({ error: "Book already rented by the user." });
+      }
+
+      // Insert rental record
+      const rentalResult = await pool.query(
+        "INSERT INTO rentals (customer_id, book_id) VALUES ($1, $2) RETURNING *",
+        [userId, bookId]
+      );
+
+      // Update book record (decrease available copies, increase rented copies)
+      await pool.query(
+        "UPDATE books SET rented_copies = rented_copies + 1 WHERE id = $1",
+        [bookId]
+      );
+
+      // Commit the transaction
+      await pool.query("COMMIT");
+
+      res.status(201).json({
+        message: "Book rented successfully",
+        rental: rentalResult.rows[0],
+      });
+    } catch (err) {
+      // Rollback transaction in case of error
+      await pool.query("ROLLBACK");
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
+// return book
+app.post(
+  "/admin/:id/returnbook/:bookId/:userId",
+  authenticateToken,
+  authorizeAdmin,
+  async (req, res) => {
+    const { bookId, userId } = req.params;
+
+    try {
+      // Begin the transaction
+      await pool.query("BEGIN");
+
+      // Check if book exists and lock the row for update
+      const bookResult = await pool.query(
+        "SELECT * FROM books WHERE id = $1 FOR UPDATE",
+        [bookId]
+      );
+
+      if (bookResult.rows.length === 0) {
+        await pool.query("ROLLBACK");
+        return res.status(404).json({ error: "Book not found" });
+      }
+
+      const book = bookResult.rows[0];
+
+      if (book.rented_copies <= 0) {
+        await pool.query("ROLLBACK");
+        return res.status(400).json({ error: "Book is not rented" });
+      }
+
+      // Update book record (decrease rented copies, increase available copies)
+      await pool.query(
+        "UPDATE books SET rented_copies = rented_copies - 1 WHERE id = $1",
+        [bookId]
+      );
+
+      // Delete rental record
+      await pool.query(
+        "DELETE FROM rentals WHERE customer_id = $1 AND book_id = $2",
+        [userId, bookId]
+      );
+
+      // Commit the transaction
+      await pool.query("COMMIT");
+
+      res.status(200).json({ message: "Book returned successfully" });
+    } catch (err) {
+      // Rollback transaction in case of error
+      await pool.query("ROLLBACK");
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
+// Delete User
+app.delete(
+  "/:userId/del",
+  authenticateToken,
+  authorizeAdmin,
+  async (req, res) => {
+    console.log(req.params);
+
+    try {
+      const { userId } = req.params;
+      await pool.query("DELETE FROM customers WHERE id = $1", [userId]);
+      console.log("User deleted successfully");
+
+      res.status(200).json({ message: "User deleted successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
     }
   }
 );

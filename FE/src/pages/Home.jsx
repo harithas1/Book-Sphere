@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { AlignJustify } from "lucide-react";
 import { useState } from "react";
 
-export const ResponsiveNavBar = ({ userId, userRole}) => {
+export const ResponsiveNavBar = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   const navigate = useNavigate();
+  
+
 
   return (
     <header className="w-full p-4 bg-gray-900 text-white flex justify-between items-center border-b border-gray-700">
@@ -61,17 +63,7 @@ export const ResponsiveNavBar = ({ userId, userRole}) => {
                 Contact
               </a>
             </li>
-            {userRole && userId && (
-              <li>
-                <a
-                  onClick={() => navigate(`/${userRole}/${userId}`)}
-                  className="text-lg font-semibold hover:text-teal-400 transition"
-                >
-                  Dashboard
-                </a>
-              </li>
-            )}
-            <li>
+           <li>
               <a
                 className="text-lg font-semibold hover:text-teal-400 transition"
                 onClick={() => navigate("/login")}
@@ -109,16 +101,7 @@ export const ResponsiveNavBar = ({ userId, userRole}) => {
               Contact
             </a>
           </li>
-          {userRole && userId && (
-            <li>
-              <a
-                onClick={() => navigate(`/${userRole}/${userId}`)}
-                className="text-lg font-semibold hover:text-teal-400 transition"
-              >
-                Dashboard
-              </a>
-            </li>
-          )}
+          
           <li>
             <a
               className="text-lg font-semibold hover:text-teal-400 transition"
@@ -141,17 +124,14 @@ export const ResponsiveNavBar = ({ userId, userRole}) => {
   );
 };
 
-const Home = ({role, id }) => {
-  const userId = id ? id : null;
-  const userRole = role ? role : null;
+const Home = () => {
   const navigate = useNavigate();
-  // const [ismobile, setIsmobile]=useState(false)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex flex-col items-center justify-center">
       {/* Header Section */}
       {/* <header className="w-full py-6 px-6 border-b border-gray-700"> */}
-      <ResponsiveNavBar userId={userId} userRole={userRole} />
+      <ResponsiveNavBar />
 
       {/* Hero Section */}
       <section className="w-full py-20 px-6 text-center">
