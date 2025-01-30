@@ -432,7 +432,6 @@ app.get(
   }
 );
 
-
 // Reset User details (Admin)
 app.put(
   "/admin/:id/user/edit/:userId",

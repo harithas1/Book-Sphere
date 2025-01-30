@@ -72,10 +72,12 @@ export default function Admin({ token, role, id }) {
     try {
       const response = await axios.get(
         `https://book-sphere-1.onrender.com/${role}/${id}/users/${
-          selectedUserName ? selectedUserName : "all"
+          selectedUserName || "all"
         }`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      console.log(response.data);
+
       setUsers(response.data);
     } catch (err) {
       console.error(err);
@@ -207,9 +209,10 @@ export default function Admin({ token, role, id }) {
   };
   // admin/:id/user/:userId
   const handleDeleteUser = async (userId) => {
+  
     try {
       await axios.delete(
-        `https://book-sphere-1.onrender.com/${role}/${id}/user/${userId}`,
+        `https://book-sphere-1.onrender.com/${userId}/del`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -242,27 +245,22 @@ export default function Admin({ token, role, id }) {
     }
   };
 
-  //   "/admin/:id/returnbook/:bookId/:userId",
-  // book_id: 2;
-  // book_title: "Vishwambara";
-  // customer_id: 2;
-  // customer_name: "Haritha";
-  // rent_date: "2025-01-28T16:29:56.080Z";
-  // rental_id: 1;
-  // return_date: null;
-  // returned: false;
   const handleReturnBook = async (returnBook) => {
-    console.log(returnBook);
-    
+   const bid = returnBook.book_id
+   const custId = returnBook.customer_id
+   console.log(bid,custId);
+   
+
     try {
       await axios.post(
-        `https://book-sphere-1.onrender.com/${role}/${id}/returnbook/${returnBook.book_id}/${returnBook.customer_id}`,
+        `https://book-sphere-1.onrender.com/${role}/${id}/returnbook/${bid}/${custId}`,
+        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert("Book returned successfully!");
-      setReturnBook(null)
+      setReturnBook(null);
       fetchBooks(selectedGenre);
-      fetchRentals()
+      fetchRentals();
     } catch (err) {
       console.error(err);
       alert("Failed to return book.");
@@ -349,10 +347,14 @@ export default function Admin({ token, role, id }) {
             />
           </section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4  md:grid-cols-3 lg:grid-cols-4">
-            {users.map((user) => (
-              <Card key={user.id} className="p-4">
-                <section>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+            {users.map(({ user, rentalHistory }) => (
+              <Card
+                key={user.id}
+                className="p-4 shadow-lg rounded-lg h-full flex flex-col"
+              >
+                {/* User Info */}
+                <section className="space-y-2 flex-grow">
                   <p>
                     <strong>ID:</strong> {user.id}
                   </p>
@@ -370,9 +372,36 @@ export default function Admin({ token, role, id }) {
                     {new Date(user.created_at).toLocaleDateString()}
                   </p>
                 </section>
-                <section className="flex flex-row justify-between mt-4">
+
+                {/* Rental History Dropdown */}
+                <section className="mt-4">
+                  <label className="block font-semibold mb-2">
+                    Previously Borrowed Books:{" "}
+                    {rentalHistory.length === 0 ? (
+                      " None"
+                    ) : (
+                      <span className="text-red-600">{rentalHistory.length}</span>
+                    )}
+                  </label>
+                  <select className="w-full p-2 border rounded bg-gray-100 cursor-not-allowed">
+                    <option>Rented Books</option>
+                    {rentalHistory.length > 0 ? (
+                      rentalHistory.map((rental) => (
+                        <option key={rental.rental_id} disabled>
+                          {rental.book_title} (Rented on:{" "}
+                          {new Date(rental.rent_date).toLocaleDateString()})
+                        </option>
+                      ))
+                    ) : (
+                      <option disabled>No rental history</option>
+                    )}
+                  </select>
+                </section>
+
+                {/* Buttons */}
+                <section className="flex flex-col sm:flex-row gap-3 mt-4">
                   <Button
-                    className=" xs:w-full bg-green-600"
+                    className="w-full sm:w-auto bg-green-600 text-white hover:bg-green-700 transition-all"
                     onClick={() =>
                       setEditUser({
                         ...user,
@@ -380,14 +409,15 @@ export default function Admin({ token, role, id }) {
                         name: user.name,
                         phone: user.phone,
                         role: user.role,
-                        newPassword: "",
+                        password: "",
                       })
                     }
                   >
                     Edit
                   </Button>
+
                   <Button
-                    className="bg-red-600 xs:w-full"
+                    className="w-full sm:w-auto bg-red-600 text-white hover:bg-red-700 transition-all"
                     onClick={() => handleDeleteUser(user.id)}
                   >
                     Delete
@@ -424,10 +454,14 @@ export default function Admin({ token, role, id }) {
             </section>
           </section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4  md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
             {books.map((book) => (
-              <Card key={book.id} className="p-4">
-                <section>
+              <Card
+                key={book.id}
+                className="p-4 md:p-6 shadow-lg rounded-lg h-full flex flex-col"
+              >
+                {/* Book Info */}
+                <section className="space-y-2 flex-grow">
                   <p>
                     <strong>ID:</strong> {book.id}
                   </p>
@@ -441,7 +475,7 @@ export default function Admin({ token, role, id }) {
                     <strong>Genre:</strong> {book.genre}
                   </p>
                   <p>
-                    <strong>Price:</strong> {book.price}
+                    <strong>Price:</strong> ${book.price}
                   </p>
                   <p>
                     <strong>Total Copies:</strong> {book.copies}
@@ -450,10 +484,11 @@ export default function Admin({ token, role, id }) {
                     <strong>Available Copies:</strong> {book.available_copies}
                   </p>
                 </section>
-                <section className="flex gap-2 flex-col sm:flex-row justify-evenly">
-                  {/* rent out */}
+
+                {/* Buttons (Always at Bottom) */}
+                <section className="flex flex-col sm:flex-row gap-3 mt-4">
                   <Button
-                    className="bg-green-500 text-white "
+                    className="bg-green-500 text-white hover:bg-green-600 transition-all"
                     variant="outline"
                     onClick={() => setRentOutBook({ ...book, userId: "" })}
                   >
@@ -461,14 +496,16 @@ export default function Admin({ token, role, id }) {
                   </Button>
 
                   <Button
-                    className="bg-blue-500 text-white"
+                    className="bg-blue-500 text-white hover:bg-blue-600 transition-all"
                     variant="outline"
                     onClick={() => setEditBook(book)}
                   >
                     Edit
                   </Button>
+
                   <Button
                     variant="destructive"
+                    className="hover:bg-red-600 transition-all"
                     onClick={() => handleDeleteBook(book.id)}
                   >
                     Delete
@@ -478,7 +515,7 @@ export default function Admin({ token, role, id }) {
             ))}
           </div>
         </TabsContent>
-         {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4  md:grid-cols-3 lg:grid-cols-4">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4  md:grid-cols-3 lg:grid-cols-4">
             {books.map((book) => (
               <Card key={book.id} className="p-4"></Card> */}
 
@@ -528,7 +565,7 @@ export default function Admin({ token, role, id }) {
                 </section>
                 <section>
                   <Button
-                  className="mt-4"
+                    className="mt-4"
                     onClick={() => setReturnBook(rental)}
                   >
                     Return Book
@@ -638,7 +675,7 @@ export default function Admin({ token, role, id }) {
             </select>
             <Input
               type="text"
-              value={editUser.newPassword}
+              value={editUser.password}
               onChange={(e) =>
                 setEditUser({ ...editUser, password: e.target.value })
               }
@@ -717,22 +754,26 @@ export default function Admin({ token, role, id }) {
               type="text"
               value={returnBook.book_title}
               placeholder="Title"
+              readOnly
             />
             <Input
               type="number"
               value={returnBook.book_id}
               placeholder="Book ID"
+              readOnly
             />
             <Input
               type="text"
               value={returnBook.customer_name}
               placeholder="Customer ID"
+              readOnly
             />
 
             <Input
               type="number"
               value={returnBook.customer_id}
               placeholder="Customer ID"
+              readOnly
             />
 
             <Button onClick={() => handleReturnBook(returnBook)}>
