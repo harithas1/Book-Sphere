@@ -32,12 +32,10 @@ const User = ({ token, role, id }) => {
     setLoading(true);
     try {
       const [userRes, historyRes] = await Promise.all([
-        axios.get(`https://book-sphere-1.onrender.com/user/${id}`,
-        {}, {
+        axios.get(`https://book-sphere-1.onrender.com/user/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get(`https://book-sphere-1.onrender.com/user/${id}/rentals`,
-        {}, {
+        axios.get(`https://book-sphere-1.onrender.com/user/${id}/rentals`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -56,7 +54,6 @@ const User = ({ token, role, id }) => {
     try {
       const { data } = await axios.get(
         `https://book-sphere-1.onrender.com/user/${id}/books/${selectedGenre}`,
-        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
