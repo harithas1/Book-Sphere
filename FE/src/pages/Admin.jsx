@@ -382,7 +382,9 @@ export default function Admin({ token, role, id }) {
                     {rentalHistory.length === 0 ? (
                       " None"
                     ) : (
-                      <span className="text-red-600">{rentalHistory.length}</span>
+                      <span className="text-red-600">
+                        {rentalHistory.length}
+                      </span>
                     )}
                   </label>
                   <select className="w-full p-2 border rounded bg-gray-100 cursor-not-allowed">
@@ -488,9 +490,9 @@ export default function Admin({ token, role, id }) {
                 </section>
 
                 {/* Buttons (Always at Bottom) */}
-                <section className="flex flex-col sm:flex-row gap-3 mt-4">
+                <section className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mt-4">
                   <Button
-                    className="bg-green-500 text-white hover:bg-green-600 transition-all"
+                    className="bg-green-500 text-white hover:bg-green-600 transition-all w-full sm:w-auto"
                     variant="outline"
                     onClick={() => setRentOutBook({ ...book, userId: "" })}
                   >
@@ -498,7 +500,7 @@ export default function Admin({ token, role, id }) {
                   </Button>
 
                   <Button
-                    className="bg-blue-500 text-white hover:bg-blue-600 transition-all"
+                    className="bg-blue-500 text-white hover:bg-blue-600 transition-all w-full sm:w-auto"
                     variant="outline"
                     onClick={() => setEditBook(book)}
                   >
@@ -507,7 +509,7 @@ export default function Admin({ token, role, id }) {
 
                   <Button
                     variant="destructive"
-                    className="hover:bg-red-600 transition-all"
+                    className="hover:bg-red-600 transition-all w-full sm:w-auto"
                     onClick={() => handleDeleteBook(book.id)}
                   >
                     Delete
