@@ -735,17 +735,16 @@ app.post(
         return res.status(400).json({ error: "Book is not rented" });
       }
 
-      // Update book record (decrease rented copies)
+      // Update book record (decrease rented copies, increase available copies)
       await pool.query(
         "UPDATE books SET rented_copies = rented_copies - 1 WHERE id = $1",
         [bookId]
       );
 
-      // Update the rental record (set return date and mark as returned)
-      const returnDate = new Date().toISOString(); // Get current date
+      // Delete rental record
       await pool.query(
-        "UPDATE rentals SET return_date = $1, returned = TRUE WHERE customer_id = $2 AND book_id = $3",
-        [returnDate, userId, bookId]
+        "DELETE FROM rentals WHERE customer_id = $1 AND book_id = $2",
+        [userId, bookId]
       );
 
       // Commit the transaction
@@ -760,7 +759,6 @@ app.post(
     }
   }
 );
-
 
 // Delete User
 app.delete(
