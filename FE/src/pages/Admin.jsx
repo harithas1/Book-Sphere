@@ -399,10 +399,10 @@ export default function Admin({ token, role, id }) {
         </TabsContent>
 
         <TabsContent value="books">
-          <section className="flex xs:flex-col sm: flex-row md:flex-row lg:flex-row sm: justify-between lg:justify-between md:justify-between items-center mb-4 gap-3 ">
+          <section className="flex xs: flex-col sm:flex-row md:flex-row lg:flex-row sm:justify-between lg:justify-between md:justify-between items-center mb-4 gap-3 ">
             <h2 className="text-2xl font-semibold mb-4">All Books</h2>
 
-            <section className="flex xs:flex-col sm:flex-row md:flex-row lg:flex-row gap-2">
+            <section className="flex xs: flex-col sm:flex-row md:flex-row lg:flex-row gap-2">
               <select
                 name="genres"
                 onChange={(e) => setSelectedGenre(e.target.value)}
@@ -427,7 +427,7 @@ export default function Admin({ token, role, id }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4  md:grid-cols-3 lg:grid-cols-4">
             {books.map((book) => (
               <Card key={book.id} className="p-4">
-                <section className="mb-4">
+                <section>
                   <p>
                     <strong>ID:</strong> {book.id}
                   </p>
@@ -478,44 +478,47 @@ export default function Admin({ token, role, id }) {
             ))}
           </div>
         </TabsContent>
+         {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4  md:grid-cols-3 lg:grid-cols-4">
+            {books.map((book) => (
+              <Card key={book.id} className="p-4"></Card> */}
 
         <TabsContent value="rent">
           <h2 className="text-2xl font-semibold mb-4">Rented Books Details</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4  md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {rentals.map((rental) => (
               <Card key={rental.rental_id} className="p-4">
-                <section className="mb-4">
+                <section>
                   <p>
-                    <strong>Rental ID:</strong> {rental.rental_id}
+                    <strong>Rental ID: </strong> {rental.rental_id}
                   </p>
                   <p>
-                    <strong>Book ID:</strong> {rental.book_id}
+                    <strong>Book ID: </strong> {rental.book_id}
                   </p>
                   <p>
-                    <strong>Book Title:</strong> {rental.book_title}
+                    <strong>Book Title: </strong> {rental.book_title}
                   </p>
                   <p>
-                    <strong>User ID:</strong> {rental.customer_id}
+                    <strong>User ID: </strong> {rental.customer_id}
                   </p>
                   <p>
-                    <strong>Customer Name:</strong> {rental.customer_name}
+                    <strong>Customer Name: </strong> {rental.customer_name}
                   </p>
                   <p>
-                    <strong>Customer Phone:</strong> {rental.customer_phone}
+                    <strong>Customer Phone: </strong> {rental.customer_phone}
                   </p>
                   <p>
-                    <strong>Rent Date:</strong>{" "}
+                    <strong>Rent Date: </strong>{" "}
                     {rental.rent_date &&
                       new Date(rental.rent_date).toLocaleDateString()}
                   </p>
                   <p>
-                    <strong>Return Date:</strong>
+                    <strong>Return Date: </strong>
                     {rental.return_date
                       ? new Date(rental.return_date).toLocaleDateString()
                       : "Not yet returned"}
                   </p>
                   <p>
-                    <strong>Returned:</strong>{" "}
+                    <strong>Returned: </strong>
                     {rental.returned ? (
                       <span className="text-green-600 font-bold">Yes</span>
                     ) : (
@@ -525,6 +528,7 @@ export default function Admin({ token, role, id }) {
                 </section>
                 <section>
                   <Button
+                  className="mt-4"
                     onClick={() => setReturnBook(rental)}
                   >
                     Return Book
