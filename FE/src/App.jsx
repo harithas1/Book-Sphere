@@ -17,20 +17,7 @@ function App() {
   const [role, setRole] = useState(""); // Role state (user/admin)
   const [id, setId] = useState(""); // User ID for personalized access
 
-  // const logout = () => {
-  //   // Clear authentication state on logout
-  //   setToken("");
-  //   setRole("");
-  //   setId("");
-
-  //   // Also clear from localStorage
-  //   localStorage.removeItem("token");
-  //   localStorage.removeItem("role");
-  //   localStorage.removeItem("id");
-  // };
-
-  // Load from localStorage on initial load
-  
+  // Check for token on component mount
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedRole = localStorage.getItem("role");
@@ -41,15 +28,12 @@ function App() {
       setRole(storedRole);
       setId(storedId);
     }
-  }, [ token, role, id]);
+  }, []);
 
   return (
     <Router>
       {/* Navigation Bar */}
-      <div className="container mx-auto flex justify-between">
-        {/* Logo and Brand Name */}
-        <div className="text-white text-2xl font-extrabold"></div>
-
+      <div className="flex justify-between">
         {/* Navigation Links */}
         <div className="flex items-center space-x-6 text-white text-lg">
           <Link
@@ -102,13 +86,13 @@ function App() {
         <Route
           path="/login"
           element={
-            <Login setRole={role ? role: setRole} setToken={token ? token : setToken} setId={id ? id : setId} />
+            <Login setRole={setRole} setToken={setToken} setId={setId} />
           }
         />
 
         {/* Admin Protected Route */}
         <Route
-          path={`/admin/${id}`}
+          path={`/admin/:id`}
           element={
             role === "admin" && token ? (
               <Admin token={token} role={role} id={id} />
@@ -122,7 +106,7 @@ function App() {
 
         {/* User Protected Route */}
         <Route
-          path={`/user/${id}`}
+          path={`/user/:id`}
           element={
             role === "user" && token && id ? (
               <User token={token} role={role} id={id} />

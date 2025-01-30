@@ -9,4 +9,5 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  base: "/", // This ensures that the base path is correctly set for routing
 });

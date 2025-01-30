@@ -8,8 +8,6 @@ export const ResponsiveNavBar = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   const navigate = useNavigate();
-  
-
 
   return (
     <header className="w-full p-4 bg-gray-900 text-white flex justify-between items-center border-b border-gray-700">
@@ -33,8 +31,7 @@ export const ResponsiveNavBar = () => {
 
       {/* Mobile Navigation */}
       {isMobile && (
-        <nav className="absolute top-40 right-12 z-50 md:hidden p-5 rounded-lg bg-gradient-to-br from-gray-800 to-gray-600 shadow-2xl">
-          <div className="absolute top-0 left-0 w-4 h-full bg-gray-500 rounded-l-lg"></div>
+        <nav className="absolute top-0 right-0 z-50 p-5 rounded-lg bg-gradient-to-br from-gray-800 to-gray-600 shadow-2xl md:hidden">
           <ul className="flex flex-col items-center gap-4 p-6">
             <li>
               <a
@@ -63,7 +60,7 @@ export const ResponsiveNavBar = () => {
                 Contact
               </a>
             </li>
-           <li>
+            <li>
               <a
                 className="text-lg font-semibold hover:text-teal-400 transition"
                 onClick={() => navigate("/login")}
@@ -101,7 +98,7 @@ export const ResponsiveNavBar = () => {
               Contact
             </a>
           </li>
-          
+
           <li>
             <a
               className="text-lg font-semibold hover:text-teal-400 transition"
@@ -134,18 +131,18 @@ const Home = () => {
       <ResponsiveNavBar />
 
       {/* Hero Section */}
-      <section className="w-full py-20 px-6 text-center">
-        <h2 className="text-5xl font-extrabold tracking-wider leading-tight text-teal-400">
+      <section className="w-full py-20 px-6 flex flex-col items-center gap-6 text-center sm:text-left sm:pl-16 justify-items-center">
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-wider leading-tight text-teal-400 text-center">
           Welcome to the World of Endless Knowledge
         </h2>
-        <p className="mt-6 text-lg text-gray-300">
+        <p className="mt-6 text-lg sm:text-xl text-gray-300">
           Dive into our curated collection of books and explore infinite
           possibilities.
         </p>
-        <div className="mt-10">
+        <div className="mt-10 flex justify-center">
           <Button
             onClick={() => navigate("/books")}
-            className="px-10 py-4 bg-teal-400 text-gray-900 font-semibold text-lg rounded-full shadow-lg hover:bg-teal-300 transition-all"
+            className="px-10 py-4 bg-teal-400 text-gray-900 font-semibold text-lg sm:text-xl rounded-full shadow-lg hover:bg-teal-300 transition-all"
           >
             Start Exploring
           </Button>
