@@ -7,7 +7,32 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const Joi = require("joi");
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://book-sphere-libra-rent.netlify.app", // Allow frontend
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+app.use((req, res, next) => {
+  res.header(
+    "Access-Control-Allow-Origin",
+    "https://book-sphere-libra-rent.netlify.app"
+  );
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  next();
+});
+
+
 app.use(express.json());
 
 const JWT_SECRET = "120kjnjhu748932983y27h";
@@ -380,11 +405,7 @@ app.get("/user/:id/rentals", authenticateToken, async (req, res) => {
 
 // Endpoint to get all users
 // search by name along with their data show their rental history
-app.get(
-  "/admin/:id/users/:search",
-  authenticateToken,
-  authorizeAdmin,
-  async (req, res) => {
+app.get("/admin/:id/users/:search",authenticateToken, authorizeAdmin,async (req, res) => {
     const { search } = req.params;
 
     try {
@@ -433,11 +454,7 @@ app.get(
 );
 
 // Reset User details (Admin)
-app.put(
-  "/admin/:id/user/edit/:userId",
-  authenticateToken,
-  authorizeAdmin,
-  async (req, res) => {
+app.put("/admin/:id/user/edit/:userId",authenticateToken, authorizeAdmin, async (req, res) => {
     const { userId } = req.params;
     const { name, phone, role, newPassword } = req.body;
     const hashedPassword = await bcrypt.hash(newPassword, 10);
