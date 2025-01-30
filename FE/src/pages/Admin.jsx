@@ -240,6 +240,7 @@ export default function Admin({ token, role, id }) {
       alert("Book rented successfully!");
       setRentOutBook(null);
       fetchBooks(selectedGenre);
+      fetchRentals();
     } catch (err) {
       console.error(err);
       alert("Failed to rent book.");
