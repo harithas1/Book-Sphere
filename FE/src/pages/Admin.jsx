@@ -281,7 +281,7 @@ export default function Admin({ token, role, id }) {
         <h1 className="text-3xl font-bold text-center">
           Hello <span className="text-teal-600">{admin?.name}!</span>
         </h1>
-        <section className="flex gap-4 xs: flex-col sm:flex-row md:flex-row lg:flex-row xs: mt-4">
+        <section className="flex gap-4flex-row mt-4">
           <Button onClick={() => navigate("/")}>Go to Home</Button>
           <Button variant="destructive" onClick={logout}>
             Logout
