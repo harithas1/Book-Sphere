@@ -1,3 +1,4 @@
+require("dotenv").config(); // Load environment variables
 const { Pool } = require("pg");
 const express = require("express");
 const app = express();
@@ -5,8 +6,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const Joi = require("joi");
-
-require("dotenv").config(); // Load environment variables
 
 const PORT = process.env.PORT || 5001;
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -43,12 +42,9 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
   ssl: {
-    rejectUnauthorized: false,
+    rejectUnauthorized: false, // Allow self-signed SSL
+    require: true, // Explicitly require SSL
   },
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });
 
 // Connect to the database and create necessary tables
