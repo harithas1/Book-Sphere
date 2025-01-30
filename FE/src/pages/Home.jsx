@@ -125,7 +125,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex flex-col items-center justify-center">
+    <div className=" bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex flex-col items-center justify-center">
       {/* Header Section */}
       {/* <header className="w-full py-6 px-6 border-b border-gray-700"> */}
       <ResponsiveNavBar />
