@@ -102,8 +102,8 @@ const User = ({ token, role, id }) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold">
-        Welcome <span className="text-teal-500">{userData?.name}!</span>
+      <h1 className="text-3xl font-bold mb-4">
+        Hello <span className="text-teal-500">{userData?.name}!</span>
       </h1>
 
       {/* Tab Navigation */}

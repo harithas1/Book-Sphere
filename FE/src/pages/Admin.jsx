@@ -277,7 +277,7 @@ export default function Admin({ token, role, id }) {
 
   return (
     <div className="max-w-8xl mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center">
+      <h1 className="text-3xl font-bold text-center mb-4">
         Hello <span className="text-teal-600">{admin?.name}!</span>
       </h1>
       <Tabs value={activeTab} onValueChange={setActiveTab}>
