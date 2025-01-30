@@ -1,15 +1,20 @@
 const { Pool } = require("pg");
 const express = require("express");
 const app = express();
-const PORT = 5001;
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const Joi = require("joi");
 
+require("dotenv").config(); // Load environment variables
+
+const PORT = process.env.PORT || 5001;
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRES = process.env.JWT_EXPIRES;
+
 app.use(
   cors({
-    origin: "https://book-sphere-libra-rent.netlify.app", // Allow frontend
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -17,10 +22,7 @@ app.use(
 );
 
 app.use((req, res, next) => {
-  res.header(
-    "Access-Control-Allow-Origin",
-    "https://book-sphere-libra-rent.netlify.app"
-  );
+  res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.header("Access-Control-Allow-Credentials", "true");
@@ -32,22 +34,21 @@ app.use((req, res, next) => {
   next();
 });
 
-
 app.use(express.json());
 
-const JWT_SECRET = "120kjnjhu748932983y27h";
-const JWT_EXPIRES = "10h";
-
-// Database connection to Render PostgreSQL
 const pool = new Pool({
-  user: "booksphere_user", // Use the correct username for your Render database
-  host: "dpg-cucbcq2j1k6c73b83b00-a.oregon-postgres.render.com", // Use the Render host URL
-  database: "booksphere", // Use the correct database name
-  password: "KbbRc3O5SJnMcvwrZFBJp5UAfkjKfsEn", // Use the correct password
-  port: 5432, // Default PostgreSQL port
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
   ssl: {
-    rejectUnauthorized: false, // Allows connections even if the SSL certificate is not authorized
+    rejectUnauthorized: false,
   },
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 // Connect to the database and create necessary tables
@@ -405,7 +406,11 @@ app.get("/user/:id/rentals", authenticateToken, async (req, res) => {
 
 // Endpoint to get all users
 // search by name along with their data show their rental history
-app.get("/admin/:id/users/:search",authenticateToken, authorizeAdmin,async (req, res) => {
+app.get(
+  "/admin/:id/users/:search",
+  authenticateToken,
+  authorizeAdmin,
+  async (req, res) => {
     const { search } = req.params;
 
     try {
@@ -454,7 +459,11 @@ app.get("/admin/:id/users/:search",authenticateToken, authorizeAdmin,async (req,
 );
 
 // Reset User details (Admin)
-app.put("/admin/:id/user/edit/:userId",authenticateToken, authorizeAdmin, async (req, res) => {
+app.put(
+  "/admin/:id/user/edit/:userId",
+  authenticateToken,
+  authorizeAdmin,
+  async (req, res) => {
     const { userId } = req.params;
     const { name, phone, role, newPassword } = req.body;
     const hashedPassword = await bcrypt.hash(newPassword, 10);
