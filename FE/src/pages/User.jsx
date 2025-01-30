@@ -99,17 +99,9 @@ const User = ({ token, role, id }) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <section className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">
-          Welcome <span className="text-teal-500">{userData?.name}!</span>
-        </h1>
-        <section className="flex gap-4">
-          <Button onClick={() => navigate("/")}>Go to Home</Button>
-          <Button variant="destructive" onClick={logout}>
-            Logout
-          </Button>
-        </section>
-      </section>
+      <h1 className="text-3xl font-bold">
+        Welcome <span className="text-teal-500">{userData?.name}!</span>
+      </h1>
 
       {/* Tab Navigation */}
       <div className="flex border-b-2 border-gray-300 mb-6">
@@ -130,8 +122,8 @@ const User = ({ token, role, id }) => {
 
       {/* Profile */}
       {activeTab === "details" && (
-        <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
-          <h2 className="text-2xl font-bold"> Your Profile</h2>
+        <div className="bg-white p-6 rounded-lg shadow-lg mb-6 space-y-2">
+          <h2 className="text-2xl font-bold">Your Profile</h2>
           <p>
             <strong>Name:</strong> {userData?.name}
           </p>
@@ -143,8 +135,16 @@ const User = ({ token, role, id }) => {
           </p>
           <p>
             <strong>Member Since:</strong>{" "}
-            {new Date(userData?.created_at).toLocaleDateString()}
+            {userData?.created_at
+              ? new Date(userData.created_at).toLocaleDateString()
+              : "N/A"}
           </p>
+          <section className="flex gap-4 mt-4">
+            <Button onClick={() => navigate("/")}>Go to Home</Button>
+            <Button variant="destructive" onClick={logout}>
+              Logout
+            </Button>
+          </section>
         </div>
       )}
 

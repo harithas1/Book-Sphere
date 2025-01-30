@@ -277,17 +277,9 @@ export default function Admin({ token, role, id }) {
 
   return (
     <div className="max-w-8xl mx-auto p-6">
-      <section className="flex justify-between place-items-center mb-6 flex-col md:flex-row lg:flex-row ">
-        <h1 className="text-3xl font-bold text-center">
-          Hello <span className="text-teal-600">{admin?.name}!</span>
-        </h1>
-        <section className="flex gap-4flex-row mt-4">
-          <Button onClick={() => navigate("/")}>Go to Home</Button>
-          <Button variant="destructive" onClick={logout}>
-            Logout
-          </Button>
-        </section>
-      </section>
+      <h1 className="text-3xl font-bold text-center">
+        Hello <span className="text-teal-600">{admin?.name}!</span>
+      </h1>
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6 lg:block justify-center sm:block md:block max-sm: hidden">
           <TabsTrigger value="adminDetails">Profile</TabsTrigger>
@@ -312,24 +304,34 @@ export default function Admin({ token, role, id }) {
 
         <TabsContent value="adminDetails">
           <h2 className="text-2xl font-semibold mb-4">Profile</h2>
-          <Card className="p-4">
-            <p>
-              <strong>ID:</strong> {admin.id}
-            </p>
-            <p>
-              <strong>Name:</strong> {admin.name}
-            </p>
-            <p>
-              <strong>Phone:</strong> {admin.phone}
-            </p>
-            <p>
-              <strong>Role:</strong> {admin.role}
-            </p>
-            <p>
-              <strong>Admin since:</strong>{" "}
-              {admin.created_at && new Date(admin.created_at).toDateString()}
-            </p>
-          </Card>
+
+          {admin?.id && (
+            <Card className="p-4 space-y-2">
+              <p>
+                <strong>ID:</strong> {admin.id}
+              </p>
+              <p>
+                <strong>Name:</strong> {admin.name}
+              </p>
+              <p>
+                <strong>Phone:</strong> {admin.phone}
+              </p>
+              <p>
+                <strong>Role:</strong> {admin.role}
+              </p>
+              <p>
+                <strong>Admin since:</strong>{" "}
+                {admin.created_at && new Date(admin.created_at).toDateString()}
+              </p>
+            </Card>
+          )}
+
+          <section className="flex justify-between mt-4">
+            <Button onClick={() => navigate("/")}>Go to Home</Button>
+            <Button variant="destructive" onClick={logout}>
+              Logout
+            </Button>
+          </section>
         </TabsContent>
 
         <TabsContent value="usersDetails">
