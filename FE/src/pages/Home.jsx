@@ -125,13 +125,13 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className=" bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white flex flex-col items-center justify-center">
       {/* Header Section */}
       {/* <header className="w-full py-6 px-6 border-b border-gray-700"> */}
       <ResponsiveNavBar />
 
       {/* Hero Section */}
-      <section className="w-full py-20 px-6 flex flex-col items-center gap-6 text-center sm:text-left sm:pl-16 justify-items-center">
+      <section className="w-full py-10 px-6 flex flex-col items-center gap-6 text-center">
         <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-wider leading-tight text-teal-400 text-center">
           Welcome to the World of Endless Knowledge
         </h2>
@@ -214,10 +214,10 @@ const Home = () => {
       </section>
 
       {/* Footer Section */}
-      <footer className="w-full bg-gray-800 py-8">
+      <footer className="w-full bg-gray-800 py-8 mt-auto">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-gray-500">
-            &copy; {new Date().getFullYear()} BookSphere. All Rights Reserved.
+            &copy; 2025 Haritha S. All Rights Reserved.
           </p>
         </div>
       </footer>
