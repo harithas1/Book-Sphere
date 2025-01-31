@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -14,7 +14,6 @@ const User = ({ token, role, id }) => {
   const [activeTab, setActiveTab] = useState("details");
 
   const navigate = useNavigate();
-  const dataFetchedRef = useRef(false);
 
   // Redirect if token exists
   useEffect(() => {
@@ -28,59 +27,51 @@ const User = ({ token, role, id }) => {
   }, [navigate]);
 
   // Fetch Profile and rental history
-  const fetchUserData = useCallback(async () => {
+  useEffect(() => {
+    if (!token || !id) return;
     setLoading(true);
-    try {
-      const [userRes, historyRes] = await Promise.all([
-        axios.get(`https://book-sphere-1.onrender.com/user/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`https://book-sphere-1.onrender.com/user/${id}/rentals`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
-      setUserData(userRes.data);
-      setHistory(historyRes.data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    Promise.all([
+      axios.get(`https://book-sphere-1.onrender.com/user/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      axios.get(`https://book-sphere-1.onrender.com/user/${id}/rentals`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ])
+      .then(([userRes, historyRes]) => {
+        setUserData(userRes.data);
+        setHistory(historyRes.data);
+      })
+      .catch((err) => {
+        setError(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [token, id]);
 
   // Fetch available books based on genre
-  const fetchAvailableBooks = useCallback(async () => {
+  useEffect(() => {
+    if (!token || !id) return;
     setLoading(true);
-    try {
-      const { data } = await axios.get(
+    axios
+      .get(
         `https://book-sphere-1.onrender.com/user/${id}/books/${selectedGenre}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setAvailableBooks(data.books);
-      setAllGenres(["all", ...data.genres]);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      .then((response) => {
+        setAvailableBooks(response.data.books);
+        setAllGenres(["all", ...response.data.genres]);
+      })
+      .catch((err) => {
+        setError(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [token, id, selectedGenre]);
-
-  // Fetch all data on first render
-  useEffect(() => {
-    if (!dataFetchedRef.current && token && id) {
-      fetchUserData();
-      fetchAvailableBooks();
-      dataFetchedRef.current = true;
-    }
-  }, [fetchUserData, fetchAvailableBooks, token, id]);
-
-  // Fetch books when selected genre changes
-  useEffect(() => {
-    if (dataFetchedRef.current) {
-      fetchAvailableBooks();
-    }
-  }, [selectedGenre, fetchAvailableBooks]);
 
   // Logout function
   const logout = () => {

@@ -9,5 +9,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: "/", // This ensures that the base path is correctly set for routing
+  base: "/", // Keep it as "/" if your app is at the root of your website
+  build: {
+    sourcemap: false, // Disable source maps in production
+  },
 });
