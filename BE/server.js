@@ -310,41 +310,51 @@ app.put("/user/:id", authenticateToken, async (req, res) => {
 
 //  View Books for Rent (/books) for User
 app.get("/user/:id/books/:filter", authenticateToken, async (req, res) => {
-  const { filter } = req.params; // Get the filter type (book_type, theme, etc.)
-  const userId = req.params.id; // Capture the user ID
+  const { filter } = req.params;
+  const { language } = req.query; // Get language filter from query params
 
   try {
-    // Step 1: Get distinct filter values for the dropdown or filter options
+    // Get distinct book types & languages for filters
     const getFilters = await pool.query(
       "SELECT DISTINCT book_type FROM books WHERE available_copies > 0"
     );
-    const allFilters = getFilters.rows.map((row) => row.book_type); // Getting distinct book types
+    const getLanguages = await pool.query(
+      "SELECT DISTINCT language FROM books WHERE available_copies > 0"
+    );
 
-    // Step 2: Query books based on the selected filter (e.g., book_type, theme, etc.)
-    let query =
-      "SELECT id, title, author, book_type, price, copies, available_copies FROM books WHERE available_copies > 0";
+    const allFilters = getFilters.rows.map((row) => row.book_type);
+    const allLanguages = getLanguages.rows.map((row) => row.language);
+
+    // Base query for books
+    let query = `
+      SELECT id, title, author, book_type, language, reading_level, theme, price, available_copies
+      FROM books WHERE available_copies > 0
+    `;
     let queryParams = [];
 
     if (filter !== "all") {
-      query += " AND book_type = $1"; // Filter by book_type (you can change this to 'theme', 'age_group', etc.)
+      query += " AND book_type = $1";
       queryParams.push(filter);
+    }
+
+    if (language && language !== "all") {
+      query += filter !== "all" ? " AND language = $2" : " AND language = $1";
+      queryParams.push(language);
     }
 
     const result = await pool.query(query, queryParams);
 
-    if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No books found for the selected filter." });
-    }
-
-    // Step 3: Return books and available filters (book types)
-    res.status(200).json({ books: result.rows, filters: allFilters });
+    res.status(200).json({
+      books: result.rows,
+      filters: allFilters,
+      languages: allLanguages,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // ---------------------- Admin Routes ----------------------
 
