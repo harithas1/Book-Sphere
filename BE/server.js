@@ -323,6 +323,7 @@ app.put("/user/:id", authenticateToken, async (req, res) => {
 app.get("/user/:id/books/:filter", authenticateToken, async (req, res) => {
   const { filter } = req.params; // Get the filter type (e.g., book_type, theme, etc.)
   const userId = req.params.id; // Capture the user ID
+  const filterValue = req.query.value; // Get the value for the filter
 
   try {
     // Step 1: Get distinct values for book_type, theme, and language (these are the filters)
@@ -347,20 +348,15 @@ app.get("/user/:id/books/:filter", authenticateToken, async (req, res) => {
     let queryParams = [];
 
     // Step 3: Dynamically build the filter query based on selected filter type and value
-    if (filter !== "all") {
-      const filterValue = req.query.value;
-
-      // Ensure that a filter value exists, and it isn't "all"
-      if (filterValue && filterValue !== "all") {
-        // Dynamically apply the filter in the SQL query
-        if (
-          filter === "book_type" ||
-          filter === "theme" ||
-          filter === "language"
-        ) {
-          query += ` AND ${filter} = $1`; // Dynamically insert the filter column name (book_type, theme, language)
-          queryParams.push(filterValue); // Add the filter value to query parameters
-        }
+    if (filter !== "all" && filterValue && filterValue !== "all") {
+      // Dynamically apply the filter in the SQL query
+      if (
+        filter === "book_type" ||
+        filter === "theme" ||
+        filter === "language"
+      ) {
+        query += ` AND ${filter} = $1`; // Dynamically insert the filter column name (book_type, theme, language)
+        queryParams.push(filterValue); // Add the filter value to query parameters
       }
     }
 
