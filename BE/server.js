@@ -121,7 +121,6 @@ const regSchema = Joi.object({
 });
 
 // Book Schema Validation
-const Joi = require("joi");
 
 const bookSchema = Joi.object({
   title: Joi.string().min(3).max(255).required(),
