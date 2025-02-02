@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
+import { LogOut, Trash2, UserPen } from "lucide-react";
 
 export default function Admin({ token, role, id }) {
   const [admin, setAdmin] = useState([]);
@@ -289,13 +290,12 @@ export default function Admin({ token, role, id }) {
         </TabsList>
         {/* Responsive tabs */}
         <select
-          className="lg:hidden sm:hidden md:hidden max-sm: block px-4 py-2 w-full rounded-md"
+          className="lg:hidden sm:hidden md:hidden max-sm: block px-4 py-2 w-full rounded-md my-4"
           name="tabs"
           id="tabs"
           value={activeTab}
           onChange={(e) => setActiveTab(e.target.value)}
         >
-          <option> select a tab</option>
           <option value="adminDetails">Admin Details</option>
           <option value="usersDetails">Customers Details</option>
           <option value="books">All Books</option>
@@ -329,7 +329,7 @@ export default function Admin({ token, role, id }) {
           <section className="flex justify-between mt-4">
             <Button onClick={() => navigate("/")}>Go to Home</Button>
             <Button variant="destructive" onClick={logout}>
-              Logout
+              Logout <LogOut color="#ffffff" />
             </Button>
           </section>
         </TabsContent>
@@ -339,10 +339,10 @@ export default function Admin({ token, role, id }) {
             <h2 className="text-2xl font-semibold mb-4">Customers Details</h2>
             <input
               // value={selectedUserName}
-              className="border border-gray-300 p-2 rounded-md"
+              className="border border-gray-300 px-4 mr-4 rounded-2xl"
               onChange={(e) => setSelectedUserName(e.target.value)}
-              type="text"
-              placeholder="🔍 Search"
+              type="search"
+              placeholder=" 🔍 Search by name..."
             />
           </section>
 
@@ -400,8 +400,27 @@ export default function Admin({ token, role, id }) {
                 </section>
 
                 {/* Buttons */}
-                <section className="flex flex-col sm:flex-row gap-3 mt-4">
-                  <Button
+                <section className="flex flex-row gap-3 justify-between mt-5">
+                  <UserPen
+                    aria-label="Edit User"
+                    className="w-6 h-6 text-blue-600 cursor-pointer hover:text-blue-800"
+                    onClick={() =>
+                      setEditUser({
+                        ...user,
+                        id: user.id,
+                        name: user.name,
+                        phone: user.phone,
+                        role: user.role,
+                        newPassword: "",
+                      })
+                    }
+                  />
+                  <Trash2
+                    aria-label="Delete User"
+                    className="w-6 h-6 cursor-pointer text-red-600 hover:text-red-800"
+                    onClick={() => handleDeleteUser(user.id)}
+                  />
+                  {/* <Button
                     className="w-full sm:w-auto bg-green-600 text-white hover:bg-green-700 transition-all"
                     onClick={() =>
                       setEditUser({
@@ -415,14 +434,13 @@ export default function Admin({ token, role, id }) {
                     }
                   >
                     Edit
-                  </Button>
-
-                  <Button
+                  </Button> */}
+                  {/* <Button
                     className="w-full sm:w-auto bg-red-600 text-white hover:bg-red-700 transition-all"
                     onClick={() => handleDeleteUser(user.id)}
                   >
                     Delete
-                  </Button>
+                  </Button> */}
                 </section>
               </Card>
             ))}

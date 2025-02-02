@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
+// import { Heart } from "lucide-react";
+import { LogOut } from "lucide-react";
+
 
 const User = ({ token, role, id }) => {
   const [userData, setUserData] = useState(null);
@@ -49,6 +52,21 @@ const User = ({ token, role, id }) => {
         setLoading(false);
       });
   }, [token, id]);
+
+  // like a book
+  // const handleLike = async (bookId) => {
+    // try {
+    //   await axios.post(
+    //     `https://book-sphere-1.onrender.com/user/${id}/like/${bookId}`,
+    //     {},
+    //     { headers: { Authorization: `Bearer ${token}` } }
+    //   );
+    //   alert("Book liked successfully!");
+    // } catch (err) {
+    //   console.error(err);
+    //   alert("Failed to like book.");
+    // }
+  // };
 
   // Fetch available books based on genre
   useEffect(() => {
@@ -133,7 +151,7 @@ const User = ({ token, role, id }) => {
           <section className="flex gap-4 mt-4">
             <Button onClick={() => navigate("/")}>Go to Home</Button>
             <Button variant="destructive" onClick={logout}>
-              Logout
+              Logout <LogOut color="#ffffff" />
             </Button>
           </section>
         </div>
@@ -199,23 +217,31 @@ const User = ({ token, role, id }) => {
             <ul className="space-y-4">
               {availableBooks.map(
                 ({ id, title, author, genre, available_copies }) => (
-                  <li
-                    key={id}
-                    className="p-4 border-2 border-gray-300 rounded-lg bg-green-100"
-                  >
-                    <p>
-                      <strong>Title:</strong> {title}
-                    </p>
-                    <p>
-                      <strong>Author:</strong> {author}
-                    </p>
-                    <p>
-                      <strong>Genre:</strong> {genre}
-                    </p>
-                    <p>
-                      <strong>Available Copies:</strong> {available_copies}
-                    </p>
-                  </li>
+                  <section key={id} className="relative">
+                    <li
+                      key={id}
+                      className="p-4 border-2 border-gray-300 rounded-lg bg-green-100"
+                    >
+                      <p>
+                        <strong>Title:</strong> {title}
+                      </p>
+                      <p>
+                        <strong>Author:</strong> {author}
+                      </p>
+                      <p>
+                        <strong>Genre:</strong> {genre}
+                      </p>
+                      <p>
+                        <strong>Available Copies:</strong> {available_copies}
+                      </p>
+                    </li>
+                    {/* <Heart
+                      onClick={() => handleLike(id)}
+                      size={32}
+                      color="#000000"
+                      className="absolute top-2 right-2 cursor-pointer"
+                    /> */}
+                  </section>
                 )
               )}
             </ul>

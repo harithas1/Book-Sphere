@@ -9,7 +9,7 @@ const Joi = require("joi");
 
 const PORT = process.env.PORT || 5001;
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES = process.env.JWT_EXPIRES;
+const JWT_EXPIRES = process.env.JWT_EXPIRES; 
 
 app.use(
   cors({
@@ -710,7 +710,7 @@ app.post(
 );
 
 // return book
-app.post(
+pp.post(
   "/admin/:id/returnbook/:bookId/:userId",
   authenticateToken,
   authorizeAdmin,
@@ -745,9 +745,9 @@ app.post(
         [bookId]
       );
 
-      // Delete rental record
+      // Update rental record (mark as returned)
       await pool.query(
-        "DELETE FROM rentals WHERE customer_id = $1 AND book_id = $2",
+        "UPDATE rentals SET returned = TRUE, return_date = CURRENT_TIMESTAMP WHERE customer_id = $1 AND book_id = $2 AND returned = FALSE",
         [userId, bookId]
       );
 
@@ -763,6 +763,7 @@ app.post(
     }
   }
 );
+
 
 // Delete User
 app.delete(
