@@ -321,34 +321,49 @@ app.put("/user/:id", authenticateToken, async (req, res) => {
 
 //  View Books for Rent (/books) for User
 app.get("/user/:id/books/:filter", authenticateToken, async (req, res) => {
-  const { filter } = req.params; // Get the filter type (book_type, theme, etc.)
+  const { filter } = req.params; // Get the filter type (e.g., book_type, theme, etc.)
   const userId = req.params.id; // Capture the user ID
 
   try {
     // Step 1: Get distinct filter values for the dropdown or filter options
-    // This assumes that you're planning to use multiple filters. Adjust the query accordingly if needed.
+    // This assumes you're planning to use multiple filters. Adjust the query if needed.
+
+    // Fetch distinct values for book_type
     const getFilters = await pool.query(
       "SELECT DISTINCT book_type FROM books WHERE available_copies > 0"
     );
     const allFilters = getFilters.rows.map((row) => row.book_type); // Getting distinct book types
 
-    // You can further extend the distinct filters based on other fields (like theme, age_group) if needed
+    // Fetch distinct themes as well
     const getThemes = await pool.query(
       "SELECT DISTINCT theme FROM books WHERE available_copies > 0"
     );
     const allThemes = getThemes.rows.map((row) => row.theme);
 
+    // Fetch distinct languages as well
+    const getLanguages = await pool.query(
+      "SELECT DISTINCT language FROM books WHERE available_copies > 0"
+    );
+    const allLanguages = getLanguages.rows.map((row) => row.language);
+
     // Step 2: Query books based on the selected filter (e.g., book_type, theme, etc.)
     let query =
-      "SELECT id, title, author, book_type, price, copies, available_copies, theme FROM books WHERE available_copies > 0";
+      "SELECT id, title, author, book_type, language, price, copies, available_copies, theme, reading_level FROM books WHERE available_copies > 0";
     let queryParams = [];
 
+    // Dynamically applying filters
     if (filter !== "all") {
-      // Dynamic filter based on the filter type (e.g., book_type, theme)
-      // You can check for other filters like theme or age_group here.
-      if (filter === "book_type" || filter === "theme") {
-        query += ` AND ${filter} = $1`;
-        queryParams.push(req.query.value); // Assuming you're passing the value of the filter in query params, e.g., /user/:id/books/book_type?value=<filter_value>
+      // Handle the dynamic filtering based on the filter type passed in the request (book_type, theme, language)
+      if (
+        filter === "book_type" ||
+        filter === "theme" ||
+        filter === "language"
+      ) {
+        const filterValue = req.query.value;
+        if (filterValue && filterValue !== "all") {
+          query += ` AND ${filter} = $1`; // Dynamically inserting filter (e.g., book_type, theme)
+          queryParams.push(filterValue); // Adding the filter value to query params
+        }
       }
     }
 
@@ -360,17 +375,19 @@ app.get("/user/:id/books/:filter", authenticateToken, async (req, res) => {
         .json({ message: "No books found for the selected filter." });
     }
 
-    // Step 3: Return books and available filters (book types)
+    // Step 3: Return books and available filters (book types, themes, languages)
     res.status(200).json({
       books: result.rows,
-      filters: allFilters,
-      themes: allThemes, // Returning distinct themes as well
+      filters: allFilters, // Returning distinct book types for filtering
+      themes: allThemes, // Returning distinct themes for filtering
+      languages: allLanguages, // Returning distinct languages for filtering
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 
 // ---------------------- Admin Routes ----------------------
