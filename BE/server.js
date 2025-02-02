@@ -325,68 +325,68 @@ app.get("/user/:id/books/:filter", authenticateToken, async (req, res) => {
   const userId = req.params.id; // Capture the user ID
 
   try {
-    // Step 1: Get distinct filter values for the dropdown or filter options
-    // This assumes you're planning to use multiple filters. Adjust the query if needed.
-
-    // Fetch distinct values for book_type
+    // Step 1: Get distinct values for book_type, theme, and language (these are the filters)
     const getFilters = await pool.query(
       "SELECT DISTINCT book_type FROM books WHERE available_copies > 0"
     );
     const allFilters = getFilters.rows.map((row) => row.book_type); // Getting distinct book types
 
-    // Fetch distinct themes as well
     const getThemes = await pool.query(
       "SELECT DISTINCT theme FROM books WHERE available_copies > 0"
     );
-    const allThemes = getThemes.rows.map((row) => row.theme);
+    const allThemes = getThemes.rows.map((row) => row.theme); // Getting distinct themes
 
-    // Fetch distinct languages as well
     const getLanguages = await pool.query(
       "SELECT DISTINCT language FROM books WHERE available_copies > 0"
     );
-    const allLanguages = getLanguages.rows.map((row) => row.language);
+    const allLanguages = getLanguages.rows.map((row) => row.language); // Getting distinct languages
 
-    // Step 2: Query books based on the selected filter (e.g., book_type, theme, etc.)
+    // Step 2: Initialize query to get books
     let query =
       "SELECT id, title, author, book_type, language, price, copies, available_copies, theme, reading_level FROM books WHERE available_copies > 0";
     let queryParams = [];
 
-    // Dynamically applying filters
+    // Step 3: Dynamically build the filter query based on selected filter type and value
     if (filter !== "all") {
-      // Handle the dynamic filtering based on the filter type passed in the request (book_type, theme, language)
-      if (
-        filter === "book_type" ||
-        filter === "theme" ||
-        filter === "language"
-      ) {
-        const filterValue = req.query.value;
-        if (filterValue && filterValue !== "all") {
-          query += ` AND ${filter} = $1`; // Dynamically inserting filter (e.g., book_type, theme)
-          queryParams.push(filterValue); // Adding the filter value to query params
+      const filterValue = req.query.value;
+
+      // Ensure that a filter value exists, and it isn't "all"
+      if (filterValue && filterValue !== "all") {
+        // Dynamically apply the filter in the SQL query
+        if (
+          filter === "book_type" ||
+          filter === "theme" ||
+          filter === "language"
+        ) {
+          query += ` AND ${filter} = $1`; // Dynamically insert the filter column name (book_type, theme, language)
+          queryParams.push(filterValue); // Add the filter value to query parameters
         }
       }
     }
 
+    // Step 4: Execute the query
     const result = await pool.query(query, queryParams);
 
+    // Step 5: Handle case when no books match the filters
     if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No books found for the selected filter." });
+      return res.status(404).json({
+        message: "No books found for the selected filter or value.",
+      });
     }
 
-    // Step 3: Return books and available filters (book types, themes, languages)
+    // Step 6: Send the filtered books and available filters (book types, themes, languages)
     res.status(200).json({
-      books: result.rows,
-      filters: allFilters, // Returning distinct book types for filtering
-      themes: allThemes, // Returning distinct themes for filtering
-      languages: allLanguages, // Returning distinct languages for filtering
+      books: result.rows, // Send the filtered books
+      filters: allFilters, // Send the distinct book types for filter options
+      themes: allThemes, // Send the distinct themes for filter options
+      languages: allLanguages, // Send the distinct languages for filter options
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 
 
