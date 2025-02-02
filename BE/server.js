@@ -64,15 +64,21 @@ const pool = new Pool({
   `;
     const createBooksTable = `
      CREATE TABLE IF NOT EXISTS books (
-        id SERIAL PRIMARY KEY,
-        title VARCHAR(255) UNIQUE NOT NULL,
-        author VARCHAR(255) NOT NULL,
-        genre VARCHAR(255) NOT NULL,
-        price DECIMAL(10, 2) NOT NULL,
-        copies INTEGER NOT NULL,
-        rented_copies INTEGER DEFAULT 0 NOT NULL,
-        available_copies INTEGER GENERATED ALWAYS AS (copies - rented_copies) STORED
-      );
+        id SERIAL PRIMARY KEY, 
+        title VARCHAR(255) UNIQUE NOT NULL,             -- Title of the book
+        author VARCHAR(255) NOT NULL,                    -- Author of the book
+        age_group VARCHAR(255),                          -- Age group (Kids, Teens, Adults)
+        book_type VARCHAR(255),                          -- Book type (Jokes, Comics, etc.)
+        language VARCHAR(255),                           -- Language of the book (e.g., English, Hindi, etc.)
+        reading_level VARCHAR(255),                      -- Reading level (Easy, Moderate, Advanced)
+        theme VARCHAR(255),                              -- Book theme (Adventure, Mystery, etc.)
+        price DECIMAL(10, 2) NOT NULL,                   -- Price of the book
+        copies INTEGER NOT NULL,                         -- Total copies of the book
+        rented_copies INTEGER DEFAULT 0 NOT NULL,        -- Rented copies of the book
+        available_copies INTEGER GENERATED ALWAYS AS (copies - rented_copies) STORED,  -- Available copies
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Timestamp of when the book was added
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Timestamp of the last update
+);
 
     `;
     const createRentalTable = `
@@ -302,41 +308,60 @@ app.put("/user/:id", authenticateToken, async (req, res) => {
   }
 });
 
-//  View Books for Rent (/books) for User
 app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
-  const { genre } = req.params;
-  const getGenres = await pool.query(
-    "SELECT DISTINCT genre FROM books WHERE available_copies > 0"
-  );
-  const allGenres = getGenres.rows.map((row) => row.genre);
-  // console.log(allGenres);
+  const { id, genre } = req.params;
+  const { age_group, book_type, language, reading_level, theme } = req.query;
 
-  // search by genre
-  if (genre !== "all") {
-    try {
-      const result = await pool.query(
-        "SELECT id, title, author, genre, price, copies, available_copies FROM books WHERE genre = $1 AND available_copies > 0",
-        [genre]
-      );
+  try {
+    // Fetch all available genres to return in response
+    const getGenres = await pool.query(
+      "SELECT DISTINCT genre FROM books WHERE available_copies > 0"
+    );
+    const allGenres = getGenres.rows.map((row) => row.genre);
 
-      res.status(200).json({ books: result.rows, genres: allGenres });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
+    // Start building the query
+    let query =
+      "SELECT id, title, author, genre, price, copies, available_copies, age_group, book_type, language, reading_level, theme FROM books WHERE available_copies > 0";
+    let params = [];
+
+    // Apply filtering by genre if not 'all'
+    if (genre !== "all") {
+      query += " AND genre = $1";
+      params.push(genre);
     }
-  } else {
-    try {
-      const result = await pool.query(
-        "SELECT id, title, author, genre, price, copies, available_copies FROM books"
-      );
 
-      res.status(200).json({ books: result.rows, genres: allGenres });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
+    // Apply optional filters from query parameters
+    if (age_group) {
+      query += " AND age_group = $2";
+      params.push(age_group);
     }
+    if (book_type) {
+      query += " AND book_type = $3";
+      params.push(book_type);
+    }
+    if (language) {
+      query += " AND language = $4";
+      params.push(language);
+    }
+    if (reading_level) {
+      query += " AND reading_level = $5";
+      params.push(reading_level);
+    }
+    if (theme) {
+      query += " AND theme = $6";
+      params.push(theme);
+    }
+
+    // Execute the query with dynamic filters
+    const result = await pool.query(query, params);
+
+    res.status(200).json({ books: result.rows, genres: allGenres });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // ---------------------- Admin Routes ----------------------
 
