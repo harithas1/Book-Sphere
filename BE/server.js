@@ -310,15 +310,7 @@ app.put("/user/:id", authenticateToken, async (req, res) => {
 
 app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
   const { id, genre } = req.params;
-  const {
-    age_group,
-    book_type,
-    language,
-    reading_level,
-    theme,
-    page = 1,
-    limit = 10,
-  } = req.query;
+  const { age_group, book_type, language, reading_level, theme } = req.query;
 
   try {
     // Fetch all available genres to return in response
@@ -327,7 +319,7 @@ app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
     );
     const allGenres = getGenres.rows.map((row) => row.genre);
 
-    // Start building the query
+    // Start building the query for books
     let query =
       "SELECT id, title, author, genre, price, copies, available_copies, age_group, book_type, language, reading_level, theme FROM books WHERE available_copies > 0";
     let params = [];
@@ -360,38 +352,15 @@ app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
       params.push(theme);
     }
 
-    // Add pagination (LIMIT and OFFSET)
-    const offset = (page - 1) * limit;
-    query += ` ORDER BY title LIMIT $${params.length + 1} OFFSET $${
-      params.length + 2
-    }`;
-    params.push(limit, offset);
-
-    // Execute the query with dynamic filters and pagination
+    // Execute the query with dynamic filters (no pagination)
     const result = await pool.query(query, params);
 
-    // Get the total count of filtered books for pagination
-    const totalCountResult = await pool.query(
-      "SELECT COUNT(*) FROM books WHERE available_copies > 0" +
-        (params.length > 0
-          ? ` AND ` + query.slice(query.indexOf("WHERE") + 5)
-          : ""),
-      params.slice(0, -2) // Remove limit and offset params
-    );
-    const totalBooks = parseInt(totalCountResult.rows[0].count, 10);
-    const totalPages = Math.ceil(totalBooks / limit);
-
-    // Return the response with books and pagination info
-    res.status(200).json({
-      books: result.rows,
-      genres: allGenres,
-      totalBooks,
-      totalPages,
-      currentPage: page,
-    });
+    res.status(200).json({ books: result.rows, genres: allGenres });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error:", err); // Log the error to help with debugging
+    res
+      .status(500)
+      .json({ error: "Internal server error", details: err.message });
   }
 });
 
