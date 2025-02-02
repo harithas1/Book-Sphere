@@ -326,19 +326,30 @@ app.get("/user/:id/books/:filter", authenticateToken, async (req, res) => {
 
   try {
     // Step 1: Get distinct filter values for the dropdown or filter options
+    // This assumes that you're planning to use multiple filters. Adjust the query accordingly if needed.
     const getFilters = await pool.query(
       "SELECT DISTINCT book_type FROM books WHERE available_copies > 0"
     );
     const allFilters = getFilters.rows.map((row) => row.book_type); // Getting distinct book types
 
+    // You can further extend the distinct filters based on other fields (like theme, age_group) if needed
+    const getThemes = await pool.query(
+      "SELECT DISTINCT theme FROM books WHERE available_copies > 0"
+    );
+    const allThemes = getThemes.rows.map((row) => row.theme);
+
     // Step 2: Query books based on the selected filter (e.g., book_type, theme, etc.)
     let query =
-      "SELECT id, title, author, book_type, price, copies, available_copies FROM books WHERE available_copies > 0";
+      "SELECT id, title, author, book_type, price, copies, available_copies, theme FROM books WHERE available_copies > 0";
     let queryParams = [];
 
     if (filter !== "all") {
-      query += " AND book_type = $1"; // Filter by book_type (you can change this to 'theme', 'age_group', etc.)
-      queryParams.push(filter);
+      // Dynamic filter based on the filter type (e.g., book_type, theme)
+      // You can check for other filters like theme or age_group here.
+      if (filter === "book_type" || filter === "theme") {
+        query += ` AND ${filter} = $1`;
+        queryParams.push(req.query.value); // Assuming you're passing the value of the filter in query params, e.g., /user/:id/books/book_type?value=<filter_value>
+      }
     }
 
     const result = await pool.query(query, queryParams);
@@ -350,12 +361,17 @@ app.get("/user/:id/books/:filter", authenticateToken, async (req, res) => {
     }
 
     // Step 3: Return books and available filters (book types)
-    res.status(200).json({ books: result.rows, filters: allFilters });
+    res.status(200).json({
+      books: result.rows,
+      filters: allFilters,
+      themes: allThemes, // Returning distinct themes as well
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // ---------------------- Admin Routes ----------------------
 
