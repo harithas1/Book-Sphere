@@ -745,11 +745,12 @@ app.post(
         [bookId]
       );
 
-      // Delete rental record
-      await pool.query(
-        "DELETE FROM rentals WHERE customer_id = $1 AND book_id = $2",
-        [userId, bookId]
-      );
+    //  update rental record
+     await pool.query(
+       "UPDATE rentals SET returned = TRUE, return_date = CURRENT_TIMESTAMP WHERE customer_id = $1 AND book_id = $2 AND returned = FALSE",
+       [userId, bookId]
+     );
+
 
       // Commit the transaction
       await pool.query("COMMIT");
