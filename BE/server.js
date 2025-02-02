@@ -9,7 +9,7 @@ const Joi = require("joi");
 
 const PORT = process.env.PORT || 5001;
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES = process.env.JWT_EXPIRES;
+const JWT_EXPIRES = process.env.JWT_EXPIRES; 
 
 app.use(
   cors({
@@ -64,21 +64,15 @@ const pool = new Pool({
   `;
     const createBooksTable = `
      CREATE TABLE IF NOT EXISTS books (
-    id SERIAL PRIMARY KEY, 
-    title VARCHAR(255) UNIQUE NOT NULL,             -- Title of the book
-    author VARCHAR(255) NOT NULL,                    -- Author of the book
-    age_group VARCHAR(255),                          -- Age group (Kids, Teens, Adults)
-    book_type VARCHAR(255),                          -- Book type (Jokes, Comics, etc.)
-    language VARCHAR(255),                           -- Language of the book (e.g., English, Hindi, etc.)
-    reading_level VARCHAR(255),                      -- Reading level (Easy, Moderate, Advanced)
-    theme VARCHAR(255),                              -- Book theme (Adventure, Mystery, etc.)
-    price DECIMAL(10, 2) NOT NULL,                   -- Price of the book
-    copies INTEGER NOT NULL,                         -- Total copies of the book
-    rented_copies INTEGER DEFAULT 0 NOT NULL,        -- Rented copies of the book
-    available_copies INTEGER GENERATED ALWAYS AS (copies - rented_copies) STORED,  -- Available copies
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Timestamp of when the book was added
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Timestamp of the last update
-);
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) UNIQUE NOT NULL,
+        author VARCHAR(255) NOT NULL,
+        genre VARCHAR(255) NOT NULL,
+        price DECIMAL(10, 2) NOT NULL,
+        copies INTEGER NOT NULL,
+        rented_copies INTEGER DEFAULT 0 NOT NULL,
+        available_copies INTEGER GENERATED ALWAYS AS (copies - rented_copies) STORED
+      );
 
     `;
     const createRentalTable = `
@@ -121,23 +115,12 @@ const regSchema = Joi.object({
 });
 
 // Book Schema Validation
-
 const bookSchema = Joi.object({
   title: Joi.string().min(3).max(255).required(),
   author: Joi.string().min(3).max(255).required(),
+  genre: Joi.string().min(3).max(255).required(),
   price: Joi.number().min(1).required(),
   copies: Joi.number().min(1).required(),
-  rented_copies: Joi.number().min(0), // rented_copies should be >= 0, but can be omitted (defaults to 0)
-  language: Joi.string().min(2).max(255).optional(),
-  book_type: Joi.string().min(3).max(255).optional(),
-  age_group: Joi.string().min(3).max(255).optional(),
-  theme: Joi.string().min(3).max(255).optional(),
-  reading_level: Joi.string().min(3).max(255).optional(),
-}).custom((value, helper) => {
-  if (value.rented_copies > value.copies) {
-    return helper.message("Rented copies cannot exceed total copies");
-  }
-  return value;
 });
 
 // Book Validation Middleware
@@ -320,74 +303,43 @@ app.put("/user/:id", authenticateToken, async (req, res) => {
 });
 
 //  View Books for Rent (/books) for User
-app.get("/user/:id/books/:filter", authenticateToken, async (req, res) => {
-  const { filter } = req.params; // Get the filter type (e.g., book_type, theme, etc.)
-  const userId = req.params.id; // Capture the user ID
-  const filterValue = req.query.value; // Get the value for the filter
+app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
+  const { genre } = req.params;
+  const getGenres = await pool.query(
+    "SELECT DISTINCT genre FROM books WHERE available_copies > 0"
+  );
+  const allGenres = getGenres.rows.map((row) => row.genre);
+  // console.log(allGenres);
 
-  // Allowed filters for validation
-  const allowedFilters = ["book_type", "theme", "language"];
-  if (!allowedFilters.includes(filter)) {
-    return res.status(400).json({ error: "Invalid filter type." });
-  }
+  // search by genre
+  if (genre !== "all") {
+    try {
+      const result = await pool.query(
+        "SELECT id, title, author, genre, price, copies, available_copies FROM books WHERE genre = $1 AND available_copies > 0",
+        [genre]
+      );
 
-  try {
-    // Step 1: Get distinct values for book_type, theme, and language (these are the filters)
-    const getFilters = await pool.query(`
-      SELECT DISTINCT book_type, theme, language 
-      FROM books 
-      WHERE available_copies > 0
-    `);
-    const allFilters = getFilters.rows.reduce(
-      (acc, row) => {
-        acc.book_types.push(row.book_type);
-        acc.themes.push(row.theme);
-        acc.languages.push(row.language);
-        return acc;
-      },
-      { book_types: [], themes: [], languages: [] }
-    );
-
-    // Step 2: Initialize query to get books
-    let query =
-      "SELECT id, title, author, book_type, language, price, copies, available_copies, theme, reading_level FROM books WHERE available_copies > 0";
-    let queryParams = [];
-
-    // Step 3: Dynamically build the filter query based on selected filter type and value
-    if (filter !== "all" && filterValue && filterValue !== "all") {
-      query += ` AND ${filter} = $1`; // Dynamically insert the filter column name (book_type, theme, language)
-      queryParams.push(filterValue); // Add the filter value to query parameters
+      res.status(200).json({ books: result.rows, genres: allGenres });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
     }
+  } else {
+    try {
+      const result = await pool.query(
+        "SELECT id, title, author, genre, price, copies, available_copies FROM books"
+      );
 
-    // Step 4: Execute the query
-    const result = await pool.query(query, queryParams);
-
-    // Step 5: Handle case when no books match the filters
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        message: "No books found for the selected filter or value.",
-      });
+      res.status(200).json({ books: result.rows, genres: allGenres });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
     }
-
-    // Step 6: Send the filtered books and available filters (book types, themes, languages)
-    res.status(200).json({
-      books: result.rows, // Send the filtered books
-      filters: allFilters.book_types, // Send the distinct book types for filter options
-      themes: allFilters.themes, // Send the distinct themes for filter options
-      languages: allFilters.languages, // Send the distinct languages for filter options
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-
-
-
 // ---------------------- Admin Routes ----------------------
 
-// fetch admin data
 app.get("/admin/:id", authenticateToken, authorizeAdmin, async (req, res) => {
   const { id } = req.params;
 
@@ -454,28 +406,19 @@ app.get(
   authenticateToken,
   authorizeAdmin,
   async (req, res) => {
-    const { id, search } = req.params;
-
-    // Validate the admin ID (ensure it's a valid number)
-    if (isNaN(id)) {
-      return res.status(400).json({ error: "Invalid admin ID format" });
-    }
+    const { search } = req.params;
 
     try {
       let result;
-
-      // If search is not 'all', perform a case-insensitive search on customer names
       if (search !== "all") {
         result = await pool.query(
           "SELECT * FROM customers WHERE name ILIKE '%' || $1 || '%'",
           [search]
         );
       } else {
-        // If search is 'all', return all customers
         result = await pool.query("SELECT * FROM customers");
       }
 
-      // If no customers are found
       if (result.rows.length === 0) {
         return res.status(404).json({ message: "No users found" });
       }
@@ -484,12 +427,6 @@ app.get(
 
       // Fetch rental history sequentially for each customer
       for (let user of result.rows) {
-        // Validate that the customer ID exists
-        if (isNaN(user.id)) {
-          return res.status(400).json({ error: "Invalid customer ID format" });
-        }
-
-        // Query rental history for each user
         const rentalHistory = await pool.query(
           `
           SELECT
@@ -503,18 +440,15 @@ app.get(
           [user.id]
         );
 
-        // Add user data with rental history
         usersWithRentalHistory.push({
           user,
           rentalHistory: rentalHistory.rows,
         });
       }
 
-      // Return the users with their rental histories
       res.status(200).json(usersWithRentalHistory);
     } catch (err) {
-      console.error(err); // Log the error for debugging
-      res.status(500).json({ error: "An error occurred while fetching users" });
+      res.status(500).json({ error: err.message });
     }
   }
 );
@@ -527,30 +461,15 @@ app.put(
   async (req, res) => {
     const { userId } = req.params;
     const { name, phone, role, newPassword } = req.body;
-
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
     try {
-      // Prepare the updated values
-      const updatedValues = [name, phone, role];
-      let updateQuery = "UPDATE customers SET name = $1, phone = $2, role = $3";
-
-      // Only hash and update the password if a new password is provided
-      if (newPassword) {
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        updatedValues.push(hashedPassword);
-        updateQuery += ", password = $4";
-      }
-
-      // Add the userId to the end of the query to target the correct user
-      updatedValues.push(userId);
-      updateQuery += " WHERE id = $5";
-
-      const result = await pool.query(updateQuery, updatedValues);
-
-      // Check if the user exists
+      const result = await pool.query(
+        "UPDATE customers SET name = $1, phone = $2, role = $3, password = $4 WHERE id = $5",
+        [name, phone, role, hashedPassword, userId]
+      );
       if (result.rowCount === 0) {
         return res.status(404).json({ error: "User not found" });
       }
-
       res.status(200).json({ message: "User details updated successfully" });
     } catch (err) {
       console.error(err);
@@ -559,59 +478,43 @@ app.put(
   }
 );
 
-// Get All Books (Admin)/ fetch book seach
+// Get All Books (Admin)
 app.get(
-  "/admin/:id/books", // Using query parameters for filtering
+  "/admin/:id/books/:genre",
   authenticateToken,
   authorizeAdmin,
   async (req, res) => {
-    const { language, theme, book_type, age_group } = req.query;
+    const { genre } = req.params;
+    const getGenres = await pool.query(
+      "SELECT DISTINCT genre FROM books WHERE available_copies > 0"
+    );
+    const allGenres = getGenres.rows.map((row) => row.genre);
+    // console.log(allGenres);
 
-    // Start with the base query that fetches only books with available copies
-    let query = `
-      SELECT id, title, author, language, theme, book_type, age_group, price, copies, available_copies
-      FROM books
-      WHERE available_copies > 0
-    `;
-    let queryParams = [];
+    // search by genre
+    if (genre !== "all") {
+      try {
+        const result = await pool.query(
+          "SELECT id, title, author, genre, price, copies, available_copies FROM books WHERE genre = $1 AND available_copies > 0",
+          [genre]
+        );
 
-    // Dynamically add filters if they are provided in the query string
-    if (language) {
-      query += " AND language = $1";
-      queryParams.push(language);
-    }
-
-    if (theme) {
-      query += " AND theme = $2";
-      queryParams.push(theme);
-    }
-
-    if (book_type) {
-      query += " AND book_type = $3";
-      queryParams.push(book_type);
-    }
-
-    if (age_group) {
-      query += " AND age_group = $4";
-      queryParams.push(age_group);
-    }
-
-    try {
-      // If no filters are provided, return all available books
-      const result = await pool.query(query, queryParams);
-
-      // Check if there are any books available
-      if (result.rows.length === 0) {
-        return res.status(404).json({ message: "No books found" });
+        res.status(200).json({ books: result.rows, genres: allGenres });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal server error" });
       }
+    } else {
+      try {
+        const result = await pool.query(
+          "SELECT id, title, author, genre, price, copies, available_copies FROM books"
+        );
 
-      // Send the filtered or all books in the response
-      res.status(200).json({
-        books: result.rows,
-      });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
+        res.status(200).json({ books: result.rows, genres: allGenres });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal server error" });
+      }
     }
   }
 );
@@ -621,72 +524,21 @@ app.put(
   "/admin/:id/book/edit/:bookId",
   authenticateToken,
   authorizeAdmin,
-  bookValidate, // Assuming this middleware validates the incoming data
+  bookValidate,
   async (req, res) => {
     const { bookId } = req.params;
-    const {
-      title,
-      author,
-      price,
-      copies,
-      rented_copies,
-      language,
-      book_type,
-      age_group,
-      theme,
-      reading_level,
-    } = req.body;
-
-    // Log the input for debugging
-    console.log(
-      bookId,
-      title,
-      author,
-      price,
-      copies,
-      rented_copies,
-      language,
-      book_type,
-      age_group,
-      theme,
-      reading_level
-    );
+    const { title, author, genre, price, copies } = req.body;
+    console.log(bookId, title, author, genre, price, copies);
 
     try {
-      // Update query for books table
       const result = await pool.query(
-        `UPDATE books SET 
-          title = $1, 
-          author = $2, 
-          price = $3, 
-          copies = $4, 
-          rented_copies = $5, 
-          language = $6, 
-          book_type = $7, 
-          age_group = $8, 
-          theme = $9, 
-          reading_level = $10, 
-          updated_at = CURRENT_TIMESTAMP 
-        WHERE id = $11`,
-        [
-          title,
-          author,
-          price,
-          copies,
-          rented_copies,
-          language,
-          book_type,
-          age_group,
-          theme,
-          reading_level,
-          bookId,
-        ]
+        `UPDATE books SET title = $1, author = $2, genre = $3, price = $4, copies = $5 WHERE id = $6`,
+        [title, author, genre, price, copies, bookId]
       );
 
       if (result.rowCount === 0) {
         return res.status(404).json({ error: "Book not found" });
       }
-
       res.status(200).json({ message: "Book updated successfully" });
     } catch (err) {
       console.error(err);
@@ -752,64 +604,26 @@ app.get(
 );
 
 // / add book (Admin)
+
 app.post(
   "/admin/:id/book/add",
   authenticateToken,
   authorizeAdmin,
   bookValidate,
   async (req, res) => {
-    const {
-      title,
-      author,
-      price,
-      copies,
-      age_group,
-      book_type,
-      language,
-      reading_level,
-      theme,
-    } = req.body;
-
-    // Ensure all required fields are provided based on the schema
-    if (
-      !title ||
-      !author ||
-      !price ||
-      !copies ||
-      !age_group ||
-      !book_type ||
-      !language ||
-      !reading_level ||
-      !theme
-    ) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
+    const { title, author, genre, price, copies } = req.body;
     try {
-      // Insert book into the database based on schema
       const result = await pool.query(
-        `INSERT INTO books (title, author, price, copies, age_group, book_type, language, reading_level, theme)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [
-          title,
-          author,
-          price,
-          copies,
-          age_group,
-          book_type,
-          language,
-          reading_level,
-          theme,
-        ]
+        "INSERT INTO books (title, author, genre, price, copies) VALUES ($1, $2, $3, $4, $5)",
+        [title, author, genre, price, copies]
       );
-
       res.status(201).json({ message: "Book added successfully" });
     } catch (error) {
       if (error.code === "23505") {
         // Handle duplicate key error for unique constraint
         res.status(400).json({
           success: false,
-          message: `The book title "${title}" already exists. Please choose a different title.`,
+          message: `The book title ${title} already exists. Please choose a different title.`,
           error: error.message,
         });
       } else {
@@ -931,9 +745,9 @@ app.post(
         [bookId]
       );
 
-      // Update rental record (mark as returned)
+      // Delete rental record
       await pool.query(
-        "UPDATE rentals SET returned = TRUE, return_date = CURRENT_TIMESTAMP WHERE customer_id = $1 AND book_id = $2 AND returned = FALSE",
+        "DELETE FROM rentals WHERE customer_id = $1 AND book_id = $2",
         [userId, bookId]
       );
 
