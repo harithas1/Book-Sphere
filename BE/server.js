@@ -325,22 +325,28 @@ app.get("/user/:id/books/:filter", authenticateToken, async (req, res) => {
   const userId = req.params.id; // Capture the user ID
   const filterValue = req.query.value; // Get the value for the filter
 
+  // Allowed filters for validation
+  const allowedFilters = ["book_type", "theme", "language"];
+  if (!allowedFilters.includes(filter)) {
+    return res.status(400).json({ error: "Invalid filter type." });
+  }
+
   try {
     // Step 1: Get distinct values for book_type, theme, and language (these are the filters)
-    const getFilters = await pool.query(
-      "SELECT DISTINCT book_type FROM books WHERE available_copies > 0"
+    const getFilters = await pool.query(`
+      SELECT DISTINCT book_type, theme, language 
+      FROM books 
+      WHERE available_copies > 0
+    `);
+    const allFilters = getFilters.rows.reduce(
+      (acc, row) => {
+        acc.book_types.push(row.book_type);
+        acc.themes.push(row.theme);
+        acc.languages.push(row.language);
+        return acc;
+      },
+      { book_types: [], themes: [], languages: [] }
     );
-    const allFilters = getFilters.rows.map((row) => row.book_type); // Getting distinct book types
-
-    const getThemes = await pool.query(
-      "SELECT DISTINCT theme FROM books WHERE available_copies > 0"
-    );
-    const allThemes = getThemes.rows.map((row) => row.theme); // Getting distinct themes
-
-    const getLanguages = await pool.query(
-      "SELECT DISTINCT language FROM books WHERE available_copies > 0"
-    );
-    const allLanguages = getLanguages.rows.map((row) => row.language); // Getting distinct languages
 
     // Step 2: Initialize query to get books
     let query =
@@ -349,15 +355,8 @@ app.get("/user/:id/books/:filter", authenticateToken, async (req, res) => {
 
     // Step 3: Dynamically build the filter query based on selected filter type and value
     if (filter !== "all" && filterValue && filterValue !== "all") {
-      // Dynamically apply the filter in the SQL query
-      if (
-        filter === "book_type" ||
-        filter === "theme" ||
-        filter === "language"
-      ) {
-        query += ` AND ${filter} = $1`; // Dynamically insert the filter column name (book_type, theme, language)
-        queryParams.push(filterValue); // Add the filter value to query parameters
-      }
+      query += ` AND ${filter} = $1`; // Dynamically insert the filter column name (book_type, theme, language)
+      queryParams.push(filterValue); // Add the filter value to query parameters
     }
 
     // Step 4: Execute the query
@@ -373,16 +372,15 @@ app.get("/user/:id/books/:filter", authenticateToken, async (req, res) => {
     // Step 6: Send the filtered books and available filters (book types, themes, languages)
     res.status(200).json({
       books: result.rows, // Send the filtered books
-      filters: allFilters, // Send the distinct book types for filter options
-      themes: allThemes, // Send the distinct themes for filter options
-      languages: allLanguages, // Send the distinct languages for filter options
+      filters: allFilters.book_types, // Send the distinct book types for filter options
+      themes: allFilters.themes, // Send the distinct themes for filter options
+      languages: allFilters.languages, // Send the distinct languages for filter options
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 
 
