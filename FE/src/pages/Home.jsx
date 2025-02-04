@@ -373,6 +373,7 @@ const Home = () => {
                   <CarouselItem
                     key={index}
                     className="flex-grow sm: basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 flex justify-center"
+                    onClick={() => navigate("/register")}
                   >
                     <div
                       className={`relative w-36 h-56 sm:w-40 sm:h-60 bg-gradient-to-br ${genre.colorStart} ${genre.colorEnd} rounded-lg shadow-2xl cursor-default`}

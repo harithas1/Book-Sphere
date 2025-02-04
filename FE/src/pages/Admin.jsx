@@ -586,7 +586,9 @@ export default function Admin({ token, role, id }) {
                 {/* Flex container for the button */}
                 <section className="mt-auto">
                   <Button
-                    className="mx-auto mt-4 w-full" // w-full ensures the button takes the full width of its container
+                    className={`mx-auto mt-4 w-full ${
+                      rental.returned ? "hidden" : ""
+                    }`} // w-full ensures the button takes the full width of its container
                     onClick={() => setReturnBook(rental)}
                   >
                     Return Book
