@@ -9,8 +9,8 @@ const User = ({ token, role, id }) => {
   const [userData, setUserData] = useState(null);
   const [history, setHistory] = useState([]);
   const [availableBooks, setAvailableBooks] = useState([]);
-  const [allGenres, setAllGenres] = useState(["all"]);
-  const [selectedGenre, setSelectedGenre] = useState("all");
+  const [allGenres, setAllGenres] = useState(["all genres"]);
+  const [selectedGenre, setSelectedGenre] = useState("all genres");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
@@ -80,7 +80,7 @@ const User = ({ token, role, id }) => {
       )
       .then((response) => {
         setAvailableBooks(response.data.books);
-        setAllGenres(["all", ...response.data.genres]);
+        setAllGenres(["all genres", ...response.data.genres]);
       })
       .catch((err) => {
         setError(err.message);

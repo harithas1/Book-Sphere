@@ -346,7 +346,7 @@ app.get("/user/:id/books/:genre", authenticateToken, async (req, res) => {
   // console.log(allGenres);
 
   // search by genre
-  if (genre !== "all") {
+  if (genre !== "all genres") {
     try {
       const result = await pool.query(
         "SELECT id, title, author, genre, price, copies, available_copies FROM books WHERE genre = $1 AND available_copies > 0",
@@ -526,7 +526,7 @@ app.get(
     // console.log(allGenres);
 
     // search by genre
-    if (genre !== "all") {
+    if (genre !== "all genres") {
       try {
         const result = await pool.query(
           "SELECT id, title, author, genre, price, copies, available_copies FROM books WHERE genre = $1 AND available_copies > 0",
