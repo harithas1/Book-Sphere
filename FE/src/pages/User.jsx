@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
-import { Heart } from "lucide-react";
+// import { Heart } from "lucide-react";
 import { LogOut } from "lucide-react";
 
 
@@ -235,12 +235,12 @@ const User = ({ token, role, id }) => {
                         <strong>Available Copies:</strong> {available_copies}
                       </p>
                     </li>
-                    <Heart
+                    {/* <Heart
                       onClick={() => handleLike(id)}
                       size={32}
                       color="#000000"
                       className="absolute top-2 right-2 cursor-pointer"
-                    />
+                    /> */}
                   </section>
                 )
               )}

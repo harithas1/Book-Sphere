@@ -339,7 +339,7 @@ export default function Admin({ token, role, id }) {
             <h2 className="text-2xl font-semibold mb-4">Customers Details</h2>
             <input
               // value={selectedUserName}
-              className="border border-gray-300 px-4 py-2 mr-4 rounded-2xl"
+              className="border border-gray-300 px-4 py-2 mx-4 rounded-2xl"
               onChange={(e) => setSelectedUserName(e.target.value)}
               type="search"
               placeholder=" 🔍 Search by name..."
@@ -466,7 +466,7 @@ export default function Admin({ token, role, id }) {
               </select>
               <Button
                 onClick={() => setIsAdding(!isadding)}
-                className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md mr-4"
+                className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md mx-4"
               >
                 Add Book
               </Button>

@@ -9,7 +9,7 @@ const Joi = require("joi");
 
 const PORT = process.env.PORT || 5001;
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES = process.env.JWT_EXPIRES; 
+const JWT_EXPIRES = process.env.JWT_EXPIRES;
 
 app.use(
   cors({
@@ -87,14 +87,48 @@ const pool = new Pool({
     );
     `;
 
+    const createContactsTable = `
+    CREATE TABLE IF NOT EXISTS contact (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+    )`;
+
     await pool.query(createCustomersTable);
     await pool.query(createBooksTable);
     await pool.query(createRentalTable);
+    await pool.query(createContactsTable);
     console.log("Created tables successfully");
   } catch (error) {
     console.log("Error creating tables:", error);
   }
 })();
+
+// contact page
+
+app.post("/contact", async (req, res) => {
+  const { name, email, message } = req.body;
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+  try {
+    const result = await pool.query(
+      "INSERT INTO contact (name, email, message) VALUES ($1, $2, $3) RETURNING id, created_at",
+      [name, email, message]
+    );
+    res.status(201).json({
+      message: "Contact message saved successfully",
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while saving the contact message" });
+  }
+});
 
 // Customer Schema Validation
 const regSchema = Joi.object({
@@ -745,12 +779,11 @@ app.post(
         [bookId]
       );
 
-    //  update rental record
-     await pool.query(
-       "UPDATE rentals SET returned = TRUE, return_date = CURRENT_TIMESTAMP WHERE customer_id = $1 AND book_id = $2 AND returned = FALSE",
-       [userId, bookId]
-     );
-
+      //  update rental record
+      await pool.query(
+        "UPDATE rentals SET returned = TRUE, return_date = CURRENT_TIMESTAMP WHERE customer_id = $1 AND book_id = $2 AND returned = FALSE",
+        [userId, bookId]
+      );
 
       // Commit the transaction
       await pool.query("COMMIT");

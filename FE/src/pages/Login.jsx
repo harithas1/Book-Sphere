@@ -75,8 +75,8 @@ export default function Login({ setRole, setToken, setId }) {
   }, []);
 
   return (
-    <div className="bg-[url('../src/assets/bookloginbg.avif')] bg-cover h-screen">
-      <section className="text-sky-100 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col border border-cyan-800 bg-opacity-20 backdrop-blur-sm bg-purple-800 gap-4 p-10 place-items-center rounded-2xl">
+    <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 h-screen">
+      <section className="text-sky-100 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col border border-teal-800 bg-opacity-20 backdrop-blur-sm bg-gray-800 gap-4 p-10 place-items-center rounded-2xl">
         <form
           className="flex flex-col gap-8 items-center text-black"
           onSubmit={handleSubmit}
@@ -111,7 +111,7 @@ export default function Login({ setRole, setToken, setId }) {
           >
             {isLoggingIn ? "Logging in..." : "Login"}
           </button>
-          <a className="text-white" onClick={() => navigate("/register")}>
+          <a className="text-white cursor-pointer hover:text-teal-700" onClick={() => navigate("/register")}>
             Register
           </a>
         </form>

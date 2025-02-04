@@ -58,14 +58,14 @@ export default function Register() {
   };
 
   return (
-    <div className="bg-[url('../src/assets/bookloginbg.avif')] bg-cover h-screen">
-      <section className="text-sky-100 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col border border-cyan-800 bg-opacity-20 backdrop-blur-sm bg-purple-800 gap-4 p-10 place-items-center rounded-2xl">
+    <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 h-screen">
+      <section className="text-sky-100 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col border border-teal-800 bg-opacity-20 backdrop-blur-sm bg-gray-800 gap-4 p-10 place-items-center rounded-2xl">
         <form
           className="flex flex-col gap-8 items-center text-black"
           onSubmit={handleSubmit}
         >
           <input
-            className="p-2"
+            className="p-2 rounded-md"
             type="text"
             placeholder="Name"
             value={form.name}
@@ -73,7 +73,7 @@ export default function Register() {
             required
           />
           <input
-            className="p-2"
+            className="p-2 rounded-md"
             type="text"
             placeholder="Phone"
             value={form.phone}
@@ -81,7 +81,7 @@ export default function Register() {
             required
           />
           <input
-            className="p-2"
+            className="p-2 rounded-md"
             type="password"
             placeholder="Password"
             value={form.password}
@@ -90,7 +90,7 @@ export default function Register() {
           />
 
           <select
-            className="p-2 w-full"
+            className="p-2 rounded-md w-full"
             value={form.role}
             onChange={(e) => setForm({ ...form, role: e.target.value })}
           >
@@ -110,7 +110,7 @@ export default function Register() {
           </button>
 
           <button
-            className="text-white hover:text-blue-700"
+            className="text-white cursor-pointer hover:text-teal-700"
             onClick={() => navigate("/login")}
           >
             Login
@@ -120,7 +120,7 @@ export default function Register() {
           {passwordError && <p className="text-red-500">{passwordError}</p>}
 
           {/* Display general message */}
-          {message && <p className="text-red-500">{message}</p>}
+          {message && <p className="text-teal-500">{message}</p>}
         </form>
       </section>
     </div>
