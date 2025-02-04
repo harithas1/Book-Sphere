@@ -5,7 +5,6 @@ import { Button } from "../components/ui/button";
 // import { Heart } from "lucide-react";
 import { LogOut } from "lucide-react";
 
-
 const User = ({ token, role, id }) => {
   const [userData, setUserData] = useState(null);
   const [history, setHistory] = useState([]);
@@ -108,9 +107,7 @@ const User = ({ token, role, id }) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">
-        Hello <span className="text-teal-500">{userData?.name}!</span>
-      </h1>
+      <h1 className="text-3xl font-bold my-4 text-teal-600">BookSphere</h1>
 
       {/* Tab Navigation */}
       <div className="flex border-b-2 border-gray-300 mb-6">

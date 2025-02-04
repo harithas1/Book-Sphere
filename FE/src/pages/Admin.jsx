@@ -278,8 +278,8 @@ export default function Admin({ token, role, id }) {
 
   return (
     <div className="max-w-8xl mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-4">
-        Hello <span className="text-teal-600">{admin?.name}!</span>
+      <h1 className="text-3xl font-bold text-center my-4 text-teal-600">
+        BookSphere
       </h1>
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6 lg:block justify-center sm:block md:block max-sm: hidden">
@@ -321,17 +321,17 @@ export default function Admin({ token, role, id }) {
               </p>
               <p>
                 <strong>Admin since:</strong>{" "}
-                {admin.created_at && new Date(admin.created_at).toDateString()}
+                {admin.created_at &&
+                  new Date(admin.created_at).toLocaleDateString()}
               </p>
+              <section className="flex gap-4 justify-between mt-4">
+                <Button onClick={() => navigate("/")}>Go to Home</Button>
+                <Button variant="destructive" onClick={logout}>
+                  Logout <LogOut color="#ffffff" />
+                </Button>
+              </section>
             </Card>
           )}
-
-          <section className="flex justify-between mt-4">
-            <Button onClick={() => navigate("/")}>Go to Home</Button>
-            <Button variant="destructive" onClick={logout}>
-              Logout <LogOut color="#ffffff" />
-            </Button>
-          </section>
         </TabsContent>
 
         <TabsContent value="usersDetails">
