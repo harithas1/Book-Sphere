@@ -2,7 +2,14 @@ import React, { useState } from "react";
 import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { AlignJustify } from "lucide-react";
-import { Mail, Phone, Instagram, Facebook, Twitter, Linkedin } from 'lucide-react'; // Import Lucide icons
+import {
+  Mail,
+  Phone,
+  Instagram,
+  Facebook,
+  Twitter,
+  Linkedin,
+} from "lucide-react"; // Import Lucide icons
 
 import {
   Carousel,
@@ -11,6 +18,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import axios from "axios";
 
 // Genre List
 const genres = [
@@ -166,12 +174,10 @@ const genres = [
   },
 ];
 
-
 // Responsive Navbar Component
 export const ResponsiveNavBar = () => {
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
-
 
   return (
     <header className="w-full p-4 bg-gray-900 text-white flex justify-between items-center border-b border-gray-700">
@@ -306,28 +312,24 @@ const Home = () => {
     setFormStatus("");
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+      const response = await axios.post(
+        "https://book-sphere-1.onrender.com/contact",
+        formData
+      ); // Replace with your API endpoint
+      console.log(response.data);
+      setFormStatus("Message sent successfully!");
+      setFormData({
+        name: "",
+        email: "",
+        message: "",
       });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setFormStatus("Message sent successfully!");
-        setFormData({ name: "", email: "", message: "" }); // Reset form
-      } else {
-        setFormStatus(result.message || "Error sending message.");
-      }
     } catch (error) {
-      setFormStatus("Network error. Please try again later.");
+      console.error(error);
+      setFormStatus("error");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
-
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
