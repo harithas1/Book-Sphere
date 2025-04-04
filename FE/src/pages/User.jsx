@@ -145,13 +145,16 @@ const User = ({ token, role, id }) => {
               ? new Date(userData.created_at).toLocaleDateString()
               : "N/A"}
           </p>
-          <section className="flex gap-4 mt-4">
-            <Button onClick={() => navigate("/")}>Go to Home</Button>
-            <Button variant="destructive" onClick={logout}>
-              Logout <LogOut color="#ffffff" />
-            </Button>
-          </section>
         </div>
+      )}
+
+      {activeTab === "details" && (
+        <section className="flex gap-4 mt-4">
+          <Button onClick={() => navigate("/")}>Go to Home</Button>
+          <Button variant="destructive" onClick={logout}>
+            Logout <LogOut color="#ffffff" />
+          </Button>
+        </section>
       )}
 
       {/* Rental History */}

@@ -10,6 +10,12 @@ import {
   Twitter,
   Linkedin,
 } from "lucide-react"; // Import Lucide icons
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import {
   Carousel,
@@ -298,6 +304,8 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [formStatus, setFormStatus] = useState(""); // success or error message
 
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -316,7 +324,7 @@ const Home = () => {
         "https://book-sphere-1.onrender.com/contact",
         formData
       ); // Replace with your API endpoint
-      console.log(response.data);
+      // console.log(response.data);
       setFormStatus("Message sent successfully!");
       setFormData({
         name: "",
@@ -372,8 +380,8 @@ const Home = () => {
                 {genres.map((genre, index) => (
                   <CarouselItem
                     key={index}
-                    className="flex-grow sm: basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 flex justify-center"
-                    onClick={() => navigate("/register")}
+                    className="flex-grow sm: basis-1/2 md:basis-1/3 lg:basis-1/5 xl:basis-1/6 flex justify-center"
+                    onClick={() => setShowLoginDialog(true)}
                   >
                     <div
                       className={`relative w-36 h-56 sm:w-40 sm:h-60 bg-gradient-to-br ${genre.colorStart} ${genre.colorEnd} rounded-lg shadow-2xl cursor-default`}
@@ -398,6 +406,23 @@ const Home = () => {
             </Carousel>
           </div>
         </section>
+
+        <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Please Login or Register</DialogTitle>
+            </DialogHeader>
+            <p className="text-gray-600">
+              You need to log in or register to explore books.
+            </p>
+            <div className="flex justify-end gap-4 mt-4">
+              <Button onClick={() => navigate("/login")}>Login</Button>
+              <Button onClick={() => navigate("/register")} variant="outline">
+                Register
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Call to Action */}
 

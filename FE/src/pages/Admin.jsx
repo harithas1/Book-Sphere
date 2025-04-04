@@ -35,7 +35,7 @@ export default function Admin({ token, role, id }) {
     price: "",
   });
   const [isadding, setIsAdding] = useState(false);
-  const [selectedGenre, setSelectedGenre] = useState("all");
+  const [selectedGenre, setSelectedGenre] = useState("all genres");
   const [selectedUserName, setSelectedUserName] = useState("all");
 
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ export default function Admin({ token, role, id }) {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log(response.data);
+      // console.log(response.data);
 
       setAdmin(response.data);
     } catch (err) {
@@ -68,7 +68,7 @@ export default function Admin({ token, role, id }) {
 
   // Fetch users, books, rentals data
   const fetchUsersData = async (selectedUserName) => {
-    console.log(selectedUserName);
+    // console.log(selectedUserName);
 
     try {
       const response = await axios.get(
@@ -77,7 +77,7 @@ export default function Admin({ token, role, id }) {
         }`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log(response.data);
+      // console.log(response.data);
 
       setUsers(response.data);
     } catch (err) {
@@ -90,7 +90,7 @@ export default function Admin({ token, role, id }) {
   }, [selectedUserName]);
 
   const handleEditUser = async () => {
-    console.log(editUser);
+    // console.log(editUser);
     try {
       await axios.put(
         `https://book-sphere-1.onrender.com/${role}/${id}/user/edit/${editUser.id}`,
@@ -99,6 +99,7 @@ export default function Admin({ token, role, id }) {
       );
       alert("User details updated successfully!");
       setEditUser(null);
+      fetchUsersData(selectedUserName);
     } catch (err) {
       console.error(err);
       alert("Failed to reset user details.");
@@ -108,10 +109,10 @@ export default function Admin({ token, role, id }) {
   const fetchBooks = async (selectedGenre) => {
     try {
       const response = await axios.get(
-        `https://book-sphere-1.onrender.com/${role}/${id}/books/${selectedGenre}`,
+        `https://book-sphere-1.onrender.com/${role}/${id}/books/${selectedGenre || "all genres"}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log(response.data.books);
+      // console.log(response.data.books);
       setBooks(response.data.books);
       setGenres(["all genres", ...response.data.genres]);
     } catch (err) {
@@ -125,7 +126,7 @@ export default function Admin({ token, role, id }) {
 
   // Update book details
   const handleUpdateBook = async () => {
-    console.log(editBook);
+    // console.log(editBook);
 
     try {
       await axios.put(
@@ -170,7 +171,7 @@ export default function Admin({ token, role, id }) {
         `https://book-sphere-1.onrender.com/${role}/${id}/rentals/details`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log(response.data);
+      // console.log(response.data);
 
       setRentals(response.data);
     } catch (err) {
@@ -179,7 +180,7 @@ export default function Admin({ token, role, id }) {
   };
 
   const handleAddBook = async () => {
-    console.log(addBook);
+    // console.log(addBook);
 
     try {
       await axios.post(
@@ -226,7 +227,7 @@ export default function Admin({ token, role, id }) {
   //  "/admin/:id/rentbook/:bookId/:userId",
 
   const handleRentOutBook = async (rentOutBook) => {
-    console.log(rentOutBook);
+    // console.log(rentOutBook);
 
     try {
       await axios.post(
@@ -247,7 +248,7 @@ export default function Admin({ token, role, id }) {
   const handleReturnBook = async (returnBook) => {
     const bid = returnBook.book_id;
     const custId = returnBook.customer_id;
-    console.log(bid, custId);
+    // console.log(bid, custId);
 
     try {
       await axios.post(
@@ -324,14 +325,14 @@ export default function Admin({ token, role, id }) {
                 {admin.created_at &&
                   new Date(admin.created_at).toLocaleDateString()}
               </p>
-              <section className="flex gap-4 justify-between mt-4">
-                <Button onClick={() => navigate("/")}>Go to Home</Button>
-                <Button variant="destructive" onClick={logout}>
-                  Logout <LogOut color="#ffffff" />
-                </Button>
-              </section>
             </Card>
           )}
+          <section className="flex gap-4 justify-between mt-4">
+            <Button onClick={() => navigate("/")}>Go to Home</Button>
+            <Button variant="destructive" onClick={logout}>
+              Logout <LogOut color="#ffffff" />
+            </Button>
+          </section>
         </TabsContent>
 
         <TabsContent value="usersDetails">
